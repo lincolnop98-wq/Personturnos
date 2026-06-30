@@ -1,13 +1,13 @@
 {
-  "name": "PersonTurnos",
-  "short_name": "PersonTurnos",
-  "description": "Registo de turnos, horas noturnas, feriados e vencimento — segurança privada",
+  "name": "PersonTrades",
+  "short_name": "PersonTrades",
+  "description": "Diário de trading para prop firms e conta pessoal",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0E1220",
-  "theme_color": "#0E1220",
+  "background_color": "#0A0E17",
+  "theme_color": "#0A0E17",
   "lang": "pt-PT",
   "icons": [
     {

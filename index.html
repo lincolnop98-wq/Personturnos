@@ -1,20 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
-<head>
-<meta charset="UTF-8">
+<html lang="pt-PT"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0E1220">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>PersonTurnos</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
-<style>html,body{margin:0;padding:0;background:#0E1220}</style>
-</head>
-<body>
-<div id="root"></div>
+<meta name="theme-color" content="#0A0E17"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes"><title>PersonTrades</title>
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<style>html,body{margin:0;padding:0;background:#0A0E17}</style></head>
+<body><div id="root"></div>
 <script>/**
  * @license React
  * react.production.min.js
@@ -46,8 +37,7 @@ render:a}};c.isValidElement=M;c.lazy=function(a){return{$$typeof:Aa,_payload:{_s
 c.useEffect=function(a,b){return g.current.useEffect(a,b)};c.useId=function(){return g.current.useId()};c.useImperativeHandle=function(a,b,c){return g.current.useImperativeHandle(a,b,c)};c.useInsertionEffect=function(a,b){return g.current.useInsertionEffect(a,b)};c.useLayoutEffect=function(a,b){return g.current.useLayoutEffect(a,b)};c.useMemo=function(a,b){return g.current.useMemo(a,b)};c.useReducer=function(a,b,c){return g.current.useReducer(a,b,c)};c.useRef=function(a){return g.current.useRef(a)};
 c.useState=function(a){return g.current.useState(a)};c.useSyncExternalStore=function(a,b,c){return g.current.useSyncExternalStore(a,b,c)};c.useTransition=function(){return g.current.useTransition()};c.version="18.3.1"});
 })();
-</script>
-<script>/**
+</script><script>/**
  * @license React
  * react-dom.production.min.js
  *
@@ -314,535 +304,181 @@ c,!1,d,e);a[Ja]=b.current;sc(8===a.nodeType?a.parentNode:a);return new Xf(b)};Q.
 var d=null!=c&&c.hydratedSources||null,e=!1,f="",g=aj;null!==c&&void 0!==c&&(!0===c.unstable_strictMode&&(e=!0),void 0!==c.identifierPrefix&&(f=c.identifierPrefix),void 0!==c.onRecoverableError&&(g=c.onRecoverableError));b=Wi(b,null,a,1,null!=c?c:null,e,!1,f,g);a[Ja]=b.current;sc(a);if(d)for(a=0;a<d.length;a++)c=d[a],e=c._getVersion,e=e(c._source),null==b.mutableSourceEagerHydrationData?b.mutableSourceEagerHydrationData=[c,e]:b.mutableSourceEagerHydrationData.push(c,e);return new Ud(b)};Q.render=
 function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmountComponentAtNode=function(a){if(!Vd(a))throw Error(m(40));return a._reactRootContainer?(yb(function(){Wd(null,null,a,!1,function(){a._reactRootContainer=null;a[Ja]=null})}),!0):!1};Q.unstable_batchedUpdates=Tf;Q.unstable_renderSubtreeIntoContainer=function(a,b,c,d){if(!Vd(c))throw Error(m(200));if(null==a||void 0===a._reactInternals)throw Error(m(38));return Wd(a,b,c,!1,d)};Q.version="18.3.1-next-f1338f8080-20240426"});
 })();
-</script>
-<script>
+</script><script>
 window.storage = {
-  async get(k){ const v = localStorage.getItem('pt_'+k); if(v===null) throw new Error('não existe'); return {key:k, value:v}; },
-  async set(k,v){ localStorage.setItem('pt_'+k, v); return {key:k, value:v}; },
-  async delete(k){ localStorage.removeItem('pt_'+k); return {key:k, deleted:true}; },
-  async list(){ return {keys: Object.keys(localStorage).filter(x=>x.startsWith('pt_')).map(x=>x.slice(3))}; }
+  async get(k){ const v = localStorage.getItem('ptr_'+k); if(v===null) throw new Error('n/a'); return {key:k, value:v}; },
+  async set(k,v){ localStorage.setItem('ptr_'+k, v); return {key:k, value:v}; },
+  async delete(k){ localStorage.removeItem('ptr_'+k); return {key:k, deleted:true}; },
+  async list(){ return {keys: Object.keys(localStorage).filter(x=>x.startsWith('ptr_')).map(x=>x.slice(4))}; }
 };
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-}
+if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 </script>
-<script>
-const {
+<script>const {
   useState,
   useEffect,
   useMemo
 } = React;
 /* ============================================================
-   PersonTurnos — registo de turnos para segurança privada (PT)
-   Ciclo mensal configurável (ex.: dia 22 → dia 21 do mês seguinte)
-   Horas noturnas (21h–06h) com majoração, vale-refeição,
-   Segurança Social e retenção de IRS configuráveis.
+   PersonTrades — diário de trading para prop firms e conta pessoal
+   Hierarquia: Contas → Mesas → Dias (com trades dentro) + Saques
+   Cálculos: P&L em $ e %, drawdown vs limite, progresso ao target,
+   margem de risco diária, modo recuperação.
+   Valores em USD com equivalente em EUR (subtil).
    ============================================================ */
 
-const STORAGE_KEY = "personturnos:v1";
-const DEFAULTS = {
-  valorHora: 5.86,
-  // confirmado nos recibos (1.015,95 € ÷ 173,333h)
-  majoracaoNoturna: 25,
-  // %
-  noiteInicio: 21,
-  // hora
-  noiteFim: 6,
-  // hora
-  valeRefeicao: 7.8,
-  taxaSS: 11,
-  // % Segurança Social (trabalhador)
-  taxaIRS: 8,
-  // % retenção — média dos recibos; ajustar se necessário
-  cicloInicio: 23,
-  // dia do mês em que começa o ciclo (escala 23 → 22)
-  cicloFim: 22,
-  // dia do mês seguinte em que termina o ciclo
-  pais: "PT",
-  // país para feriados automáticos
-  acrescimoFeriado: 100,
-  // % extra em feriado (100 = horas a dobrar)
-  minHorasVale: 6 // mínimo de horas no dia para contar o vale-refeição
+const STORAGE_KEY = "persontrades:v1";
+
+/* ---------- paleta: "terminal de trading", distinta do PersonTurnos ---------- */
+const C = {
+  bg: "#0A0E17",
+  panel: "#111725",
+  panel2: "#161D2E",
+  line: "#212A40",
+  ink: "#E7ECF5",
+  dim: "#7E88A0",
+  cyan: "#37D4CF",
+  // acento principal (frio, "mercado")
+  cyanDim: "rgba(55,212,207,0.12)",
+  up: "#3DDC84",
+  // verde lucro
+  down: "#FF5C7A",
+  // vermelho perda
+  warn: "#FFB454",
+  // âmbar aviso
+  violet: "#8B8CF0"
 };
 
-/* ---------- feriados nacionais (calculados localmente) ---------- */
-
-/* Domingo de Páscoa (algoritmo gregoriano) */
-function pascoa(ano) {
-  const a = ano % 19,
-    b = Math.floor(ano / 100),
-    c = ano % 100;
-  const d = Math.floor(b / 4),
-    e = b % 4,
-    f = Math.floor((b + 8) / 25);
-  const g = Math.floor((b - f + 1) / 3),
-    h = (19 * a + b - d - g + 15) % 30;
-  const i = Math.floor(c / 4),
-    k = c % 4,
-    l = (32 + 2 * e + 2 * i - h - k) % 7;
-  const m = Math.floor((a + 11 * h + 22 * l) / 451);
-  const mes = Math.floor((h + l - 7 * m + 114) / 31);
-  const dia = (h + l - 7 * m + 114) % 31 + 1;
-  return new Date(ano, mes - 1, dia);
-}
-const somaDias = (dt, n) => {
-  const d = new Date(dt);
-  d.setDate(d.getDate() + n);
-  return d;
-};
-const fx = (ano, mes, dia) => new Date(ano, mes - 1, dia);
-
-/* Cada país devolve [[Date, nome], …] dos feriados nacionais do ano */
-const PAISES_FERIADOS = {
-  PT: {
-    nome: "Portugal",
-    feriados: y => {
-      const P = pascoa(y);
-      return [[fx(y, 1, 1), "Ano Novo"], [somaDias(P, -2), "Sexta-feira Santa"], [P, "Páscoa"], [fx(y, 4, 25), "Dia da Liberdade"], [fx(y, 5, 1), "Dia do Trabalhador"], [somaDias(P, 60), "Corpo de Deus"], [fx(y, 6, 10), "Dia de Portugal"], [fx(y, 8, 15), "Assunção de N. Senhora"], [fx(y, 10, 5), "Implantação da República"], [fx(y, 11, 1), "Todos os Santos"], [fx(y, 12, 1), "Restauração da Independência"], [fx(y, 12, 8), "Imaculada Conceição"], [fx(y, 12, 25), "Natal"]];
+/* ---------- modelos de prop firms (editáveis) ---------- */
+/* Hantec: valores confirmados na página oficial de regras (htrader.hmarkets.com/programs/rules)
+   e, no caso da Endurance, também no dashboard do utilizador.
+   targetPct é por fase; drawdown total pode ser trailing ou estático. */
+const TAMANHOS = [2000, 5000, 10000, 25000, 50000, 100000, 200000];
+const MODELOS_FIRMAS = {
+  hantec: {
+    nome: "Hantec",
+    programas: {
+      "Express (1 etapa)": {
+        fases: 1,
+        targetPct: [10, 0, 0],
+        perdaDiaPct: 5,
+        perdaTotalPct: 6,
+        trailing: true,
+        // bloqueia ao atingir 6% de lucro
+        minDias: 0
+      },
+      "Enhanced (2 etapas)": {
+        fases: 2,
+        targetPct: [10, 5, 0],
+        perdaDiaPct: 5,
+        perdaTotalPct: 10,
+        trailing: false,
+        minDias: 3
+      },
+      "EnhancedX (2 etapas)": {
+        fases: 2,
+        targetPct: [10, 5, 0],
+        perdaDiaPct: 4,
+        perdaTotalPct: 8,
+        trailing: false,
+        minDias: 0
+      },
+      "Endurance (3 etapas)": {
+        fases: 3,
+        targetPct: [6, 6, 6],
+        perdaDiaPct: 4,
+        perdaTotalPct: 8,
+        trailing: true,
+        minDias: 3
+      },
+      "Instant Funding": {
+        fases: 0,
+        targetPct: [0, 0, 0],
+        perdaDiaPct: 5,
+        perdaTotalPct: 6,
+        trailing: true,
+        minDias: 0
+      },
+      "Instant Lite": {
+        fases: 0,
+        targetPct: [0, 0, 0],
+        perdaDiaPct: 3,
+        perdaTotalPct: 5,
+        trailing: true,
+        minDias: 0
+      },
+      "Instant24": {
+        fases: 0,
+        targetPct: [0, 0, 0],
+        perdaDiaPct: 2,
+        perdaTotalPct: 3,
+        trailing: true,
+        minDias: 0
+      }
     }
   },
-  ES: {
-    nome: "Espanha",
-    feriados: y => {
-      const P = pascoa(y);
-      return [[fx(y, 1, 1), "Año Nuevo"], [fx(y, 1, 6), "Epifanía"], [somaDias(P, -2), "Viernes Santo"], [fx(y, 5, 1), "Día del Trabajador"], [fx(y, 8, 15), "Asunción"], [fx(y, 10, 12), "Fiesta Nacional"], [fx(y, 11, 1), "Todos los Santos"], [fx(y, 12, 6), "Día de la Constitución"], [fx(y, 12, 8), "Inmaculada Concepción"], [fx(y, 12, 25), "Navidad"]];
+  ftmo: {
+    nome: "FTMO",
+    programas: {
+      "Normal 2 etapas (a confirmar)": {
+        fases: 2,
+        targetPct: [10, 5, 0],
+        perdaDiaPct: 5,
+        perdaTotalPct: 10,
+        trailing: false,
+        minDias: 4,
+        aConfirmar: true
+      }
     }
   },
-  FR: {
-    nome: "França",
-    feriados: y => {
-      const P = pascoa(y);
-      return [[fx(y, 1, 1), "Jour de l'an"], [somaDias(P, 1), "Lundi de Pâques"], [fx(y, 5, 1), "Fête du Travail"], [fx(y, 5, 8), "Victoire 1945"], [somaDias(P, 39), "Ascension"], [somaDias(P, 50), "Lundi de Pentecôte"], [fx(y, 7, 14), "Fête Nationale"], [fx(y, 8, 15), "Assomption"], [fx(y, 11, 1), "Toussaint"], [fx(y, 11, 11), "Armistice 1918"], [fx(y, 12, 25), "Noël"]];
-    }
-  },
-  BR: {
-    nome: "Brasil",
-    feriados: y => {
-      const P = pascoa(y);
-      return [[fx(y, 1, 1), "Confraternização Universal"], [somaDias(P, -2), "Sexta-feira Santa"], [fx(y, 4, 21), "Tiradentes"], [fx(y, 5, 1), "Dia do Trabalho"], [fx(y, 9, 7), "Independência"], [fx(y, 10, 12), "N. Sra. Aparecida"], [fx(y, 11, 2), "Finados"], [fx(y, 11, 15), "Proclamação da República"], [fx(y, 11, 20), "Consciência Negra"], [fx(y, 12, 25), "Natal"]];
+  the5ers: {
+    nome: "The5ers",
+    programas: {
+      "Hyper Growth (a confirmar)": {
+        fases: 2,
+        targetPct: [8, 5, 0],
+        perdaDiaPct: 5,
+        perdaTotalPct: 10,
+        trailing: false,
+        minDias: 3,
+        aConfirmar: true
+      }
     }
   }
 };
-const C = {
-  bg: "#0E1220",
-  card: "#161B2C",
-  card2: "#1C2235",
-  border: "#262E48",
-  text: "#E9EDF6",
-  muted: "#8C95AD",
-  amber: "#FFB454",
-  amberDim: "rgba(255,180,84,0.14)",
-  indigo: "#7B83EB",
-  indigoDim: "rgba(123,131,235,0.16)",
-  green: "#5BD89A",
-  red: "#F2738C"
-};
-const eur = v => new Intl.NumberFormat("pt-PT", {
+const ATIVOS = ["XAUUSD", "XAUEUR", "XAUGBP", "XAUAUD", "XAGUSD", "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "EURJPY", "GBPJPY", "US30", "US500", "NAS100", "GER40", "UK100", "HK50", "JP225", "BTCUSD", "ETHUSD", "USOIL", "Outro"];
+
+/* ---------- utilidades ---------- */
+const usd = v => new Intl.NumberFormat("en-US", {
   style: "currency",
-  currency: "EUR"
+  currency: "USD",
+  maximumFractionDigits: 2
 }).format(v || 0);
+const pct = v => `${v >= 0 ? "+" : ""}${(v || 0).toLocaleString("pt-PT", {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 2
+})}%`;
 const MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 const DIAS_SEMANA = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
+const isoLocal = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const hojeISO = () => isoLocal(new Date());
 function fmtData(iso) {
   const [y, m, d] = iso.split("-").map(Number);
   const dt = new Date(y, m - 1, d);
   return `${DIAS_SEMANA[dt.getDay()]}, ${d} ${MESES[m - 1]}`;
 }
-function fmtHoras(min) {
-  const h = Math.floor(min / 60);
-  const m = Math.round(min % 60);
-  return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, "0")}`;
-}
-const toMin = hhmm => {
-  const [h, m] = hhmm.split(":").map(Number);
-  return h * 60 + (m || 0);
-};
+const uid = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-/* Divide um turno em minutos diurnos e noturnos.
-   Suporta turnos que atravessam a meia-noite. */
-function splitTurno(inicio, fim, noiteInicio, noiteFim) {
-  const s = toMin(inicio);
-  let e = toMin(fim);
-  if (e <= s) e += 1440; // atravessa a meia-noite
-  const total = e - s;
-  const nIni = noiteInicio * 60; // ex. 1260 (21:00)
-  const nFim = noiteFim * 60; // ex. 360 (06:00)
-  let noite = 0;
-
-  // Janela noturna de cada "dia": [nIni, nFim+1440] quando atravessa a meia-noite
-  for (const k of [-1, 0, 1]) {
-    const a = nIni + 1440 * k;
-    const b = (nFim <= nIni ? nFim + 1440 : nFim) + 1440 * k;
-    const ini = Math.max(s, a);
-    const fimJ = Math.min(e, b);
-    if (fimJ > ini) noite += fimJ - ini;
-  }
-  noite = Math.min(noite, total);
-  return {
-    totalMin: total,
-    noiteMin: noite,
-    diaMin: total - noite
-  };
-}
-
-/* minutos noturnos dentro de um intervalo [s, e) em minutos (0–2880) */
-function minutosNoite(s, e, noiteInicio, noiteFim) {
-  const nIni = noiteInicio * 60;
-  const nFimM = noiteFim * 60;
-  const b0 = nFimM <= nIni ? nFimM + 1440 : nFimM;
-  let noite = 0;
-  for (const k of [-1, 0, 1]) {
-    const ini = Math.max(s, nIni + 1440 * k);
-    const fim = Math.min(e, b0 + 1440 * k);
-    if (fim > ini) noite += fim - ini;
-  }
-  return noite;
-}
-function diaSeguinteISO(iso) {
-  const [y, m, d] = iso.split("-").map(Number);
-  return isoLocal(new Date(y, m - 1, d + 1));
-}
-
-/* ---------- exportação: imagem "escala + recibo" ---------- */
-
-function gerarImagemFolha({
-  titulo,
-  dias,
-  porData,
-  cfg,
-  resumo,
-  mapaFeriados,
-  isFeriado
-}) {
-  const W = 1080;
-  const PAD = 56;
-  const escala = 2; // nitidez
-
-  // dias trabalhados, por ordem cronológica
-  const trabalhados = dias.filter(d => (porData[d] || []).length > 0);
-
-  // altura: cabeçalho + linhas + recibo + rodapé
-  const linhasExtra = trabalhados.reduce((acc, d) => acc + Math.max(0, (porData[d] || []).length - 1), 0);
-  const altCab = 170;
-  const altLinha = 64;
-  const altBloco = 34;
-  const altRecibo = 470;
-  const H = altCab + 44 +
-  // cabeçalho da tabela
-  trabalhados.length * altLinha + linhasExtra * altBloco + 40 + altRecibo + 70;
-  const cv = document.createElement("canvas");
-  cv.width = W * escala;
-  cv.height = H * escala;
-  const cx = cv.getContext("2d");
-  cx.scale(escala, escala);
-  const F = (peso, tam, cond = false) => `${peso} ${tam}px ${cond ? "'Barlow Condensed'," : ""} 'Barlow', sans-serif`;
-
-  // fundo
-  cx.fillStyle = C.bg;
-  cx.fillRect(0, 0, W, H);
-
-  // cabeçalho
-  cx.fillStyle = C.card;
-  cx.fillRect(0, 0, W, altCab - 30);
-  cx.fillStyle = C.amberDim;
-  cx.fillRect(0, altCab - 34, W, 4);
-  cx.fillStyle = C.text;
-  cx.font = F(700, 34, true);
-  cx.fillText("PERSON", PAD, 64);
-  const wP = cx.measureText("PERSON").width;
-  cx.fillStyle = C.amber;
-  cx.fillText("TURNOS", PAD + wP, 64);
-  cx.fillStyle = C.muted;
-  cx.font = F(600, 14);
-  cx.fillText("FOLHA DE SERVIÇO · SEGURANÇA PRIVADA", PAD, 90);
-  cx.fillStyle = C.text;
-  cx.font = F(600, 22, true);
-  cx.textAlign = "right";
-  cx.fillText(titulo, W - PAD, 64);
-  cx.fillStyle = C.muted;
-  cx.font = F(400, 14);
-  cx.fillText(`${resumo.dias} dias trabalhados · ${fmtHoras(resumo.totalMin)}`, W - PAD, 90);
-  cx.textAlign = "left";
-
-  // cabeçalho da tabela
-  let y = altCab + 8;
-  const colDia = PAD;
-  const colLocal = PAD + 200;
-  const colHorario = PAD + 470;
-  const colHoras = PAD + 700;
-  const colValor = W - PAD;
-  cx.fillStyle = C.muted;
-  cx.font = F(700, 12);
-  cx.fillText("DIA", colDia, y);
-  cx.fillText("LOCAL", colLocal, y);
-  cx.fillText("HORÁRIO", colHorario, y);
-  cx.fillText("HORAS", colHoras, y);
-  cx.textAlign = "right";
-  cx.fillText("VALOR", colValor, y);
-  cx.textAlign = "left";
-  y += 14;
-
-  // linhas
-  for (let i = 0; i < trabalhados.length; i++) {
-    const dISO = trabalhados[i];
-    const items = porData[dISO] || [];
-    let totalMin = 0,
-      noturnas = 0,
-      ferMin = 0,
-      valor = 0;
-    for (const e of items) {
-      const t = calcularTurno(e, cfg, isFeriado);
-      totalMin += t.totalMin;
-      noturnas += t.noiteMin + t.noiteFerMin;
-      ferMin += t.ferMin;
-      valor += t.valor;
-    }
-    const altura = altLinha + Math.max(0, items.length - 1) * altBloco;
-    if (i % 2 === 0) {
-      cx.fillStyle = "rgba(255,255,255,0.025)";
-      cx.fillRect(PAD - 16, y, W - 2 * PAD + 32, altura - 8);
-    }
-    const feriadoNome = mapaFeriados.get(dISO);
-    cx.fillStyle = ferMin > 0 ? C.red : noturnas > 0 ? C.indigo : C.amber;
-    cx.fillRect(PAD - 16, y, 4, altura - 8);
-    const yT = y + 26;
-    cx.fillStyle = C.text;
-    cx.font = F(700, 17);
-    cx.fillText(fmtData(dISO), colDia, yT);
-    if (feriadoNome) {
-      cx.fillStyle = C.red;
-      cx.font = F(700, 11);
-      cx.fillText(feriadoNome.toUpperCase(), colDia, yT + 18);
-    }
-    const local = items.map(e => e.local).find(Boolean) || "—";
-    cx.fillStyle = C.muted;
-    cx.font = F(500, 15);
-    cx.fillText(local.length > 26 ? local.slice(0, 25) + "…" : local, colLocal, yT);
-    cx.fillStyle = C.text;
-    cx.font = F(500, 15);
-    items.forEach((e, j) => {
-      const seg = toMin(e.saida) <= toMin(e.entrada) ? " (+1)" : "";
-      cx.fillText(`${e.entrada} – ${e.saida}${seg}`, colHorario, yT + j * altBloco);
-    });
-    cx.font = F(600, 15);
-    cx.fillStyle = C.text;
-    cx.fillText(fmtHoras(totalMin), colHoras, yT);
-    cx.fillStyle = C.muted;
-    cx.font = F(400, 12);
-    const partes = [];
-    if (totalMin - noturnas > 0) partes.push(`${fmtHoras(totalMin - noturnas)} dia`);
-    if (noturnas > 0) partes.push(`${fmtHoras(noturnas)} noite`);
-    if (ferMin > 0) partes.push(`${fmtHoras(ferMin)} feriado`);
-    cx.fillText(partes.join(" · "), colHoras, yT + 18);
-    cx.textAlign = "right";
-    cx.fillStyle = C.text;
-    cx.font = F(700, 17, true);
-    cx.fillText(eur(valor), colValor, yT);
-    cx.textAlign = "left";
-    y += altura;
-  }
-
-  // recibo
-  y += 24;
-  const xR = PAD - 16;
-  const wR = W - 2 * PAD + 32;
-  cx.fillStyle = C.card;
-  cx.strokeStyle = C.border;
-  cx.lineWidth = 1.5;
-  const r = 16;
-  cx.beginPath();
-  if (cx.roundRect) cx.roundRect(xR, y, wR, altRecibo, r);else cx.rect(xR, y, wR, altRecibo);
-  cx.fill();
-  cx.stroke();
-  let yR = y + 44;
-  cx.fillStyle = C.muted;
-  cx.font = F(700, 13);
-  cx.fillText("RESUMO DO PERÍODO", xR + 28, yR);
-  yR += 16;
-  const linha = (nome, valor, cor, forte, sinal) => {
-    yR += forte ? 44 : 34;
-    cx.fillStyle = forte ? C.text : C.muted;
-    cx.font = F(forte ? 700 : 400, forte ? 18 : 15);
-    cx.fillText(nome, xR + 28, yR);
-    cx.textAlign = "right";
-    cx.fillStyle = cor || C.text;
-    cx.font = F(forte ? 700 : 600, forte ? 28 : 18, true);
-    cx.fillText((sinal === "-" ? "− " : "") + valor, xR + wR - 28, yR);
-    cx.textAlign = "left";
-  };
-  const separador = () => {
-    yR += 18;
-    cx.strokeStyle = C.border;
-    cx.beginPath();
-    cx.moveTo(xR + 28, yR);
-    cx.lineTo(xR + wR - 28, yR);
-    cx.stroke();
-  };
-  linha(`Horas diurnas (${fmtHoras(resumo.diaMin)} × ${eur(cfg.valorHora)})`, eur(resumo.brutoDia));
-  linha(`Horas noturnas (${fmtHoras(resumo.noiteMin)} × ${eur(resumo.valorNoturno)})`, eur(resumo.brutoNoite), C.indigo);
-  if (resumo.ferMin > 0) linha(`Horas em feriado (${fmtHoras(resumo.ferMin)} × ${(1 + (cfg.acrescimoFeriado || 0) / 100).toLocaleString("pt-PT")}×)`, eur(resumo.brutoFeriado), C.amber);
-  separador();
-  linha("Bruto das horas", eur(resumo.brutoHoras));
-  linha(`Subsídio de alimentação (${resumo.vales} dias ≥ ${cfg.minHorasVale}h × ${eur(cfg.valeRefeicao)})`, eur(resumo.subAlim));
-  separador();
-  linha(`Segurança Social (${cfg.taxaSS}%)`, eur(resumo.ss), C.red, false, "-");
-  linha(`Retenção IRS (${cfg.taxaIRS}%)`, eur(resumo.irs), C.red, false, "-");
-  separador();
-  linha("LÍQUIDO ESTIMADO", eur(resumo.liquido), C.green, true);
-
-  // rodapé
-  cx.fillStyle = C.muted;
-  cx.font = F(400, 12);
-  const hoje = new Date();
-  cx.fillText(`Estimativa indicativa · gerado por PersonTurnos a ${hoje.getDate()} ${MESES[hoje.getMonth()]} ${hoje.getFullYear()}`, PAD, H - 28);
-  return cv.toDataURL("image/png");
-}
-
-/* Cálculo completo de um turno: separa na meia-noite para que os
-   minutos depois das 00h contem para o dia seguinte (importante para
-   feriados) e classifica cada parte em dia/noite e feriado/normal. */
-function calcularTurno(e, cfg, isFeriado) {
-  const s = toMin(e.entrada);
-  let f = toMin(e.saida);
-  if (f <= s) f += 1440;
-  const segmentos = [];
-  if (s < 1440) segmentos.push([s, Math.min(f, 1440), e.data]);
-  if (f > 1440) segmentos.push([Math.max(s, 1440), f, diaSeguinteISO(e.data)]);
-  let diaMin = 0,
-    noiteMin = 0,
-    diaFerMin = 0,
-    noiteFerMin = 0;
-  for (const [a, b, dataSeg] of segmentos) {
-    const n = minutosNoite(a, b, cfg.noiteInicio, cfg.noiteFim);
-    const d = b - a - n;
-    if (isFeriado && isFeriado(dataSeg)) {
-      diaFerMin += d;
-      noiteFerMin += n;
-    } else {
-      diaMin += d;
-      noiteMin += n;
-    }
-  }
-  const vH = cfg.valorHora;
-  const vN = vH * (1 + cfg.majoracaoNoturna / 100);
-  const multF = 1 + (cfg.acrescimoFeriado || 0) / 100;
-  const valorNormal = diaMin / 60 * vH + noiteMin / 60 * vN;
-  const valorFeriado = (diaFerMin / 60 * vH + noiteFerMin / 60 * vN) * multF;
-  return {
-    totalMin: f - s,
-    diaMin,
-    noiteMin,
-    diaFerMin,
-    noiteFerMin,
-    ferMin: diaFerMin + noiteFerMin,
-    valor: valorNormal + valorFeriado,
-    valorFeriado
-  };
-}
-
-/* Período do ciclo: começa no dia `cicloInicio` e termina no dia
-   `cicloFim` do mês seguinte (ex.: 22 mai → 23 jun). */
-function calcularPeriodo(offset, cicloInicio, cicloFim) {
-  const hoje = new Date();
-  let ano = hoje.getFullYear();
-  let mes = hoje.getMonth();
-  if (hoje.getDate() < cicloInicio) mes -= 1;
-  mes += offset;
-  const inicio = new Date(ano, mes, cicloInicio);
-  const fim = new Date(ano, mes + 1, cicloFim);
-  return {
-    inicio,
-    fim
-  };
-}
-const isoLocal = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-function hojeISO() {
-  return isoLocal(new Date());
-}
-
-/* ---------------- componentes de UI ---------------- */
-
-function Campo({
-  label,
-  children
-}) {
-  return /*#__PURE__*/React.createElement("label", {
-    style: {
-      display: "block"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      display: "block",
-      fontSize: 11,
-      letterSpacing: "0.08em",
-      textTransform: "uppercase",
-      color: C.muted,
-      marginBottom: 6,
-      fontWeight: 600
-    }
-  }, label), children);
-}
-const inputStyle = {
-  width: "100%",
-  background: C.card2,
-  border: `1px solid ${C.border}`,
-  borderRadius: 10,
-  color: C.text,
-  padding: "10px 12px",
-  fontSize: 15,
-  fontFamily: "inherit",
-  outline: "none",
-  colorScheme: "dark"
-};
-function Linha({
-  nome,
-  valor,
-  cor,
-  forte,
-  sinal
-}) {
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "baseline",
-      padding: "7px 0"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: forte ? C.text : C.muted,
-      fontSize: forte ? 15 : 14,
-      fontWeight: forte ? 700 : 400
-    }
-  }, nome), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: "'Barlow Condensed', sans-serif",
-      fontSize: forte ? 24 : 17,
-      fontWeight: forte ? 700 : 600,
-      color: cor || C.text,
-      fontVariantNumeric: "tabular-nums"
-    }
-  }, sinal === "-" ? "− " : "", valor));
-}
-
-/* ---------------- app ---------------- */
-
-function PersonTurnos() {
+/* ============================================================
+   APP
+   ============================================================ */
+function PersonTrades() {
   const [carregado, setCarregado] = useState(false);
-  const [entradas, setEntradas] = useState([]);
-  const [cfg, setCfg] = useState(DEFAULTS);
-  const [feriadosExtra, setFeriadosExtra] = useState([]); // feriados manuais (ex.: municipal)
-  const [aba, setAba] = useState("folha");
-  const [offset, setOffset] = useState(0);
-  const [confirmar, setConfirmar] = useState(null);
-  const [imgExport, setImgExport] = useState(null);
-
-  // formulário de novo turno
-  const [fDatas, setFDatas] = useState([]); // dias selecionados (vários de uma vez)
-  const [fEntrada, setFEntrada] = useState("20:00");
-  const [fSaida, setFSaida] = useState("08:00");
-  const [fLocal, setFLocal] = useState("");
-  const [fVale, setFVale] = useState(true);
+  const [contas, setContas] = useState([]); // [{id, nome, tipo, mesas:[...]}]
+  const [taxaEur, setTaxaEur] = useState(0.92); // $1 → €0,92 (fallback)
+  const [vista, setVista] = useState({
+    ecra: "inicio"
+  }); // inicio | mesa
+  const [novaConta, setNovaConta] = useState(false);
 
   /* carregar */
   useEffect(() => {
@@ -851,15 +487,11 @@ function PersonTurnos() {
         const r = await window.storage.get(STORAGE_KEY);
         if (r?.value) {
           const d = JSON.parse(r.value);
-          if (Array.isArray(d.entradas)) setEntradas(d.entradas);
-          if (d.cfg) setCfg({
-            ...DEFAULTS,
-            ...d.cfg
-          });
-          if (Array.isArray(d.feriadosExtra)) setFeriadosExtra(d.feriadosExtra);
+          if (Array.isArray(d.contas)) setContas(d.contas);
+          if (d.taxaEur) setTaxaEur(d.taxaEur);
         }
       } catch (e) {
-        /* sem dados guardados ainda */
+        /* primeira vez */
       } finally {
         setCarregado(true);
       }
@@ -872,183 +504,1631 @@ function PersonTurnos() {
     (async () => {
       try {
         await window.storage.set(STORAGE_KEY, JSON.stringify({
-          entradas,
-          cfg,
-          feriadosExtra
+          contas,
+          taxaEur
         }));
       } catch (e) {
         console.error("Falha ao guardar", e);
       }
     })();
-  }, [entradas, cfg, feriadosExtra, carregado]);
-  const periodo = useMemo(() => calcularPeriodo(offset, cfg.cicloInicio, cfg.cicloFim), [offset, cfg.cicloInicio, cfg.cicloFim]);
-  const doPeriodo = useMemo(() => {
-    const a = isoLocal(periodo.inicio);
-    const b = isoLocal(periodo.fim);
-    return entradas.filter(e => e.data >= a && e.data <= b).sort((x, y) => x.data < y.data ? 1 : x.data > y.data ? -1 : 0);
-  }, [entradas, periodo]);
+  }, [contas, taxaEur, carregado]);
 
-  /* todos os dias do ciclo, por ordem, para a Folha */
-  const diasDoPeriodo = useMemo(() => {
-    const dias = [];
-    const d = new Date(periodo.inicio);
-    while (d <= periodo.fim) {
-      dias.push(isoLocal(d));
-      d.setDate(d.getDate() + 1);
-    }
-    return dias;
-  }, [periodo]);
-  const porData = useMemo(() => {
-    const m = {};
-    for (const e of entradas) {
-      (m[e.data] = m[e.data] || []).push(e);
-    }
-    for (const k in m) m[k].sort((a, b) => a.entrada < b.entrada ? -1 : 1);
-    return m;
-  }, [entradas]);
-
-  /* mapa data ISO → nome do feriado, para os anos do período */
-  const mapaFeriados = useMemo(() => {
-    const m = new Map();
-    const pais = PAISES_FERIADOS[cfg.pais];
-    const anos = new Set([periodo.inicio.getFullYear(), periodo.fim.getFullYear(), periodo.fim.getFullYear() + 1]);
-    if (pais) {
-      for (const ano of anos) {
-        for (const [dt, nome] of pais.feriados(ano)) m.set(isoLocal(dt), nome);
+  /* cotação €/$ em tempo real (subtil; cai no fallback offline) */
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetch("https://api.frankfurter.app/latest?from=USD&to=EUR");
+        const j = await r.json();
+        if (j?.rates?.EUR) setTaxaEur(j.rates.EUR);
+      } catch (e) {
+        /* mantém o último valor guardado */
       }
-    }
-    for (const iso of feriadosExtra) {
-      if (!m.has(iso)) m.set(iso, "Feriado local");
-    }
-    return m;
-  }, [cfg.pais, feriadosExtra, periodo]);
-  const isFeriado = iso => mapaFeriados.has(iso);
-  const resumo = useMemo(() => {
-    let diaMin = 0,
-      noiteMin = 0,
-      ferMin = 0,
-      brutoNormalDia = 0,
-      brutoNormalNoite = 0,
-      brutoFeriado = 0;
-    const minutosPorDia = new Map(); // data → minutos trabalhados
-    const diasValeAtivo = new Set(); // dias com vale não desligado
-    const diasTrabalhados = new Set();
-    const vH = cfg.valorHora;
-    const vN = vH * (1 + cfg.majoracaoNoturna / 100);
-    for (const e of doPeriodo) {
-      const t = calcularTurno(e, cfg, isFeriado);
-      diaMin += t.diaMin;
-      noiteMin += t.noiteMin;
-      ferMin += t.ferMin;
-      brutoNormalDia += t.diaMin / 60 * vH;
-      brutoNormalNoite += t.noiteMin / 60 * vN;
-      brutoFeriado += t.valorFeriado;
-      diasTrabalhados.add(e.data);
-      minutosPorDia.set(e.data, (minutosPorDia.get(e.data) || 0) + t.totalMin);
-      if (e.vale !== false) diasValeAtivo.add(e.data);
-    }
-    // vale-refeição: só em dias com pelo menos `minHorasVale` horas
-    const limiteVale = (cfg.minHorasVale || 0) * 60;
-    let vales = 0;
-    for (const d of diasValeAtivo) {
-      if ((minutosPorDia.get(d) || 0) >= limiteVale) vales += 1;
-    }
-    const brutoHoras = brutoNormalDia + brutoNormalNoite + brutoFeriado;
-    const subAlim = vales * cfg.valeRefeicao;
-    const ss = brutoHoras * (cfg.taxaSS / 100);
-    const irs = brutoHoras * (cfg.taxaIRS / 100);
-    const liquido = brutoHoras + subAlim - ss - irs;
-    return {
-      diaMin,
-      noiteMin,
-      ferMin,
-      totalMin: diaMin + noiteMin + ferMin,
-      dias: diasTrabalhados.size,
-      vales,
-      valorNoturno: vN,
-      brutoDia: brutoNormalDia,
-      brutoNoite: brutoNormalNoite,
-      brutoFeriado,
-      brutoHoras,
-      subAlim,
-      ss,
-      irs,
-      liquido
-    };
-  }, [doPeriodo, cfg, mapaFeriados]);
-  const locais = useMemo(() => {
-    const s = new Set(entradas.map(e => e.local).filter(Boolean));
-    return [...s].sort();
-  }, [entradas]);
-  const [flash, setFlash] = useState("");
+    })();
+  }, []);
+  const eur = v => `≈ ${new Intl.NumberFormat("pt-PT", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0
+  }).format((v || 0) * taxaEur)}`;
 
-  /* Cria o mesmo turno (hora + local) em todos os dias selecionados */
-  function adicionarTurno() {
-    if (fDatas.length === 0 || !fEntrada || !fSaida) return;
-    const novas = [...fDatas].sort().map((data, i) => ({
-      id: `${Date.now()}-${i}-${Math.random().toString(36).slice(2, 7)}`,
-      data,
-      entrada: fEntrada,
-      saida: fSaida,
-      local: fLocal.trim(),
-      vale: fVale
-    }));
-    setEntradas(prev => [...prev, ...novas]);
-    setFlash(novas.length === 1 ? "✓ 1 dia registado" : `✓ ${novas.length} dias registados com o mesmo turno`);
-    setFDatas([]);
-    setTimeout(() => setFlash(""), 3000);
-  }
-  function apagar(id) {
-    setEntradas(prev => prev.filter(e => e.id !== id));
-    setConfirmar(null);
-  }
-  function criarEntrada(data, entrada, saida, local) {
-    setEntradas(prev => [...prev, {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      data,
-      entrada,
-      saida,
-      local: (local || "").trim(),
-      vale: true
+  /* ---- operações sobre o estado ---- */
+  function addConta(nome, tipo) {
+    setContas(prev => [...prev, {
+      id: uid(),
+      nome,
+      tipo,
+      mesas: []
     }]);
   }
-  function atualizarEntrada(id, patch) {
-    setEntradas(prev => prev.map(e => e.id === id ? {
-      ...e,
-      ...patch
-    } : e));
+  function removeConta(id) {
+    setContas(prev => prev.filter(c => c.id !== id));
   }
-  function alternarValeDia(data) {
-    setEntradas(prev => {
-      const algumCom = prev.some(e => e.data === data && e.vale !== false);
-      return prev.map(e => e.data === data ? {
-        ...e,
-        vale: !algumCom
-      } : e);
-    });
+  function addMesa(contaId, mesa) {
+    setContas(prev => prev.map(c => c.id === contaId ? {
+      ...c,
+      mesas: [...c.mesas, {
+        id: uid(),
+        ...mesa,
+        dias: {},
+        saques: []
+      }]
+    } : c));
   }
-  const tituloPeriodo = `${periodo.inicio.getDate()} ${MESES[periodo.inicio.getMonth()]} — ${periodo.fim.getDate()} ${MESES[periodo.fim.getMonth()]} ${periodo.fim.getFullYear()}`;
-  const num = v => isNaN(parseFloat(v)) ? 0 : parseFloat(v);
+  function updateMesa(contaId, mesaId, patch) {
+    setContas(prev => prev.map(c => c.id !== contaId ? c : {
+      ...c,
+      mesas: c.mesas.map(m => m.id === mesaId ? {
+        ...m,
+        ...patch
+      } : m)
+    }));
+  }
+  function removeMesa(contaId, mesaId) {
+    setContas(prev => prev.map(c => c.id === contaId ? {
+      ...c,
+      mesas: c.mesas.filter(m => m.id !== mesaId)
+    } : c));
+  }
+  const contaAtual = contas.find(c => c.id === vista.contaId);
+  const mesaAtual = contaAtual?.mesas.find(m => m.id === vista.mesaId);
   return /*#__PURE__*/React.createElement("div", {
     style: {
       minHeight: "100vh",
       background: C.bg,
-      color: C.text,
-      fontFamily: "'Barlow', system-ui, sans-serif",
-      paddingBottom: 90
+      color: C.ink,
+      fontFamily: "'Inter', system-ui, sans-serif",
+      paddingBottom: 40
     }
   }, /*#__PURE__*/React.createElement("style", null, `
-        @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
         * { box-sizing: border-box; }
-        input:focus, button:focus-visible { outline: 2px solid ${C.amber}; outline-offset: 1px; }
-        input[type="time"]::-webkit-calendar-picker-indicator,
-        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.7); }
-        @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-      `), /*#__PURE__*/React.createElement("header", {
+        input:focus, select:focus, button:focus-visible { outline: 2px solid ${C.cyan}; outline-offset: 1px; }
+        input, select { color-scheme: dark; }
+        @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+      `), !carregado ? /*#__PURE__*/React.createElement("p", {
     style: {
-      padding: "20px 18px 14px",
-      borderBottom: `1px solid ${C.border}`,
-      background: `linear-gradient(180deg, ${C.card} 0%, ${C.bg} 100%)`
+      color: C.dim,
+      textAlign: "center",
+      marginTop: 60
+    }
+  }, "A carregar…") : mesaAtual ? /*#__PURE__*/React.createElement(EcraMesa, {
+    conta: contaAtual,
+    mesa: mesaAtual,
+    usd: usd,
+    eur: eur,
+    onVoltar: () => setVista({
+      ecra: "inicio"
+    }),
+    onUpdate: patch => updateMesa(contaAtual.id, mesaAtual.id, patch),
+    onRemover: () => {
+      removeMesa(contaAtual.id, mesaAtual.id);
+      setVista({
+        ecra: "inicio"
+      });
+    }
+  }) : /*#__PURE__*/React.createElement(EcraInicio, {
+    contas: contas,
+    usd: usd,
+    eur: eur,
+    onAbrirMesa: (contaId, mesaId) => setVista({
+      ecra: "mesa",
+      contaId,
+      mesaId
+    }),
+    onAddConta: addConta,
+    onRemoveConta: removeConta,
+    onAddMesa: addMesa,
+    novaConta: novaConta,
+    setNovaConta: setNovaConta
+  }));
+}
+
+/* ============================================================
+   ECRÃ INICIAL — lista de contas e mesas
+   ============================================================ */
+function EcraInicio({
+  contas,
+  usd,
+  eur,
+  onAbrirMesa,
+  onAddConta,
+  onRemoveConta,
+  onAddMesa,
+  novaConta,
+  setNovaConta
+}) {
+  const [mesaPara, setMesaPara] = useState(null); // contaId para adicionar mesa
+
+  // total geral (soma de P&L de todas as mesas)
+  const totalPnL = contas.reduce((acc, c) => acc + c.mesas.reduce((a, m) => a + pnlMesa(m).pnl, 0), 0);
+  const totalSaques = contas.reduce((acc, c) => acc + c.mesas.reduce((a, m) => a + (m.saques || []).reduce((s, x) => s + x.valor, 0), 0), 0);
+  const props = contas.filter(c => c.tipo === "prop");
+  const pessoais = contas.filter(c => c.tipo === "pessoal");
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Cabecalho, {
+    titulo: "PERSON",
+    destaque: "TRADES",
+    sub: "Diário de trading"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "0 16px",
+      maxWidth: 600,
+      margin: "0 auto"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 10,
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement(CartaoNumero, {
+    rotulo: "P&L global",
+    valor: usd(totalPnL),
+    sub: eur(totalPnL),
+    cor: totalPnL > 0 ? C.up : totalPnL < 0 ? C.down : C.ink
+  }), /*#__PURE__*/React.createElement(CartaoNumero, {
+    rotulo: "Saques recebidos",
+    valor: usd(totalSaques),
+    sub: eur(totalSaques),
+    cor: C.cyan
+  })), contas.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      border: `1px dashed ${C.line}`,
+      borderRadius: 14,
+      padding: "28px 20px",
+      textAlign: "center",
+      color: C.dim,
+      marginBottom: 16
+    }
+  }, "Ainda não tens contas. Cria a tua primeira prop firm ou conta pessoal para começar a registar."), /*#__PURE__*/React.createElement(SeccaoContas, {
+    titulo: "Prop firms",
+    contas: props,
+    usd: usd,
+    eur: eur,
+    onAbrirMesa: onAbrirMesa,
+    onRemoveConta: onRemoveConta,
+    onPedirMesa: setMesaPara
+  }), /*#__PURE__*/React.createElement(SeccaoContas, {
+    titulo: "Conta pessoal",
+    contas: pessoais,
+    usd: usd,
+    eur: eur,
+    onAbrirMesa: onAbrirMesa,
+    onRemoveConta: onRemoveConta,
+    onPedirMesa: setMesaPara
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setNovaConta(true),
+    style: {
+      ...btnPrimario,
+      width: "100%",
+      marginTop: 8
+    }
+  }, "+ Nova conta")), novaConta && /*#__PURE__*/React.createElement(ModalNovaConta, {
+    onFechar: () => setNovaConta(false),
+    onCriar: (nome, tipo) => {
+      onAddConta(nome, tipo);
+      setNovaConta(false);
+    }
+  }), mesaPara && /*#__PURE__*/React.createElement(ModalNovaMesa, {
+    onFechar: () => setMesaPara(null),
+    onCriar: mesa => {
+      onAddMesa(mesaPara, mesa);
+      setMesaPara(null);
+    }
+  }));
+}
+function SeccaoContas({
+  titulo,
+  contas,
+  usd,
+  eur,
+  onAbrirMesa,
+  onRemoveConta,
+  onPedirMesa
+}) {
+  if (contas.length === 0) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: tituloSeccao
+  }, titulo), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 12
+    }
+  }, contas.map(c => /*#__PURE__*/React.createElement("div", {
+    key: c.id,
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 14,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "12px 14px",
+      borderBottom: c.mesas.length ? `1px solid ${C.line}` : "none"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 700,
+      fontSize: 16
+    }
+  }, c.nome), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => onPedirMesa(c.id),
+    style: btnMini
+  }, "+ mesa"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => onRemoveConta(c.id),
+    style: {
+      ...btnMini,
+      color: C.down
+    }
+  }, "×"))), c.mesas.map(m => {
+    const r = pnlMesa(m);
+    return /*#__PURE__*/React.createElement("button", {
+      key: m.id,
+      onClick: () => onAbrirMesa(c.id, m.id),
+      style: {
+        width: "100%",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        background: "transparent",
+        border: "none",
+        borderTop: `1px solid ${C.line}`,
+        padding: "12px 14px",
+        cursor: "pointer",
+        color: C.ink,
+        fontFamily: "inherit",
+        textAlign: "left"
+      }
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontWeight: 600,
+        fontSize: 15
+      }
+    }, m.etiqueta), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: C.dim,
+        marginTop: 2
+      }
+    }, usd(m.saldoInicial), " · ", faseRotulo(m))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        textAlign: "right"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: "'JetBrains Mono', monospace",
+        fontWeight: 700,
+        fontSize: 16,
+        color: r.pnl > 0 ? C.up : r.pnl < 0 ? C.down : C.ink
+      }
+    }, pct(r.pnlPct)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: C.dim
+      }
+    }, usd(r.pnl))));
+  })))));
+}
+
+/* ============================================================
+   ECRÃ DA MESA — dias/trades, saques, métricas
+   ============================================================ */
+function EcraMesa({
+  conta,
+  mesa,
+  usd,
+  eur,
+  onVoltar,
+  onUpdate,
+  onRemover
+}) {
+  const [aba, setAba] = useState("painel"); // painel | registar | saques | regras
+  const r = useMemo(() => pnlMesa(mesa), [mesa]);
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      borderBottom: `1px solid ${C.line}`,
+      padding: "14px 16px"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: onVoltar,
+    style: {
+      ...btnTexto,
+      paddingLeft: 0,
+      color: C.cyan
+    }
+  }, "‹ ", conta.nome), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "baseline",
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement("h1", {
+    style: {
+      fontSize: 22,
+      fontWeight: 700,
+      margin: 0
+    }
+  }, mesa.etiqueta), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: C.dim
+    }
+  }, usd(mesa.saldoInicial))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: C.dim,
+      marginTop: 2
+    }
+  }, faseRotulo(mesa))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 16,
+      maxWidth: 600,
+      margin: "0 auto"
+    }
+  }, aba === "painel" && /*#__PURE__*/React.createElement(PainelMesa, {
+    mesa: mesa,
+    r: r,
+    usd: usd,
+    eur: eur
+  }), aba === "registar" && /*#__PURE__*/React.createElement(RegistarDias, {
+    mesa: mesa,
+    usd: usd,
+    onUpdate: onUpdate
+  }), aba === "saques" && /*#__PURE__*/React.createElement(Saques, {
+    mesa: mesa,
+    usd: usd,
+    eur: eur,
+    onUpdate: onUpdate
+  }), aba === "regras" && /*#__PURE__*/React.createElement(RegrasMesa, {
+    mesa: mesa,
+    usd: usd,
+    onUpdate: onUpdate,
+    onRemover: onRemover
+  })), /*#__PURE__*/React.createElement("nav", {
+    style: {
+      position: "fixed",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      background: C.panel,
+      borderTop: `1px solid ${C.line}`,
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr 1fr 1fr",
+      padding: "8px 8px calc(8px + env(safe-area-inset-bottom))",
+      gap: 4,
+      maxWidth: 600,
+      margin: "0 auto"
+    }
+  }, [["painel", "Painel"], ["registar", "Registar"], ["saques", "Saques"], ["regras", "Regras"]].map(([id, nome]) => /*#__PURE__*/React.createElement("button", {
+    key: id,
+    onClick: () => setAba(id),
+    style: {
+      background: aba === id ? C.cyanDim : "transparent",
+      border: aba === id ? `1px solid ${C.cyan}55` : "1px solid transparent",
+      color: aba === id ? C.cyan : C.dim,
+      borderRadius: 9,
+      padding: "9px 0",
+      fontSize: 13,
+      fontWeight: 600,
+      fontFamily: "inherit",
+      cursor: "pointer"
+    }
+  }, nome))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 64
+    }
+  }));
+}
+
+/* ---------- Painel: métricas-chave + gestão de risco ---------- */
+function PainelMesa({
+  mesa,
+  r,
+  usd,
+  eur
+}) {
+  const margemTotal = r.saldoAtual - r.limiteTotal; // quanto falta para quebrar
+  const margemTotalPct = margemTotal / mesa.saldoInicial * 100;
+  const progresso = mesa.regras.targetPct[mesa.faseAtual - 1] || 0;
+  const alvoValor = mesa.saldoInicial * (1 + progresso / 100);
+  const faltaTarget = alvoValor - r.saldoAtual;
+  const progPct = progresso > 0 ? Math.max(0, Math.min(100, r.pnlPct / progresso * 100)) : 100;
+
+  // margem de risco hoje (limite diário): perda diária permitida sobre o saldo de início do dia
+  const riscoDiaValor = mesa.saldoInicial * (mesa.regras.perdaDiaPct / 100);
+  const recuperacao = r.pnlPct < 0;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 14,
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.dim,
+      textTransform: "uppercase",
+      letterSpacing: "0.08em"
+    }
+  }, "Saldo atual"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'JetBrains Mono', monospace",
+      fontSize: 30,
+      fontWeight: 700,
+      marginTop: 4
+    }
+  }, usd(r.saldoAtual)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.dim
+    }
+  }, eur(r.saldoAtual)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 6,
+      fontFamily: "'JetBrains Mono', monospace",
+      fontWeight: 700,
+      color: r.pnl > 0 ? C.up : r.pnl < 0 ? C.down : C.ink
+    }
+  }, pct(r.pnlPct), " · ", usd(r.pnl))), progresso > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 14,
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: C.dim
+    }
+  }, "Progresso ao alvo (", progresso, "%)"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color: C.cyan
+    }
+  }, progPct.toFixed(0), "%")), /*#__PURE__*/React.createElement(Barra, {
+    valor: progPct,
+    cor: C.cyan
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.dim,
+      marginTop: 8
+    }
+  }, faltaTarget > 0 ? `Faltam ${usd(faltaTarget)} para o alvo (${usd(alvoValor)})` : `Alvo atingido! 🎯`)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 14,
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: C.dim
+    }
+  }, "Margem até quebrar ", mesa.regras.trailing ? "(trailing)" : "(estático)"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color: margemTotalPct < 2 ? C.down : margemTotalPct < 4 ? C.warn : C.up
+    }
+  }, usd(margemTotal))), /*#__PURE__*/React.createElement(Barra, {
+    valor: Math.max(0, Math.min(100, margemTotal / (mesa.saldoInicial * (mesa.regras.perdaTotalPct / 100)) * 100)),
+    cor: margemTotalPct < 2 ? C.down : margemTotalPct < 4 ? C.warn : C.up
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.dim,
+      marginTop: 8
+    }
+  }, "Limite total em ", usd(r.limiteTotal), " · perde tudo a ", mesa.regras.perdaTotalPct, "% do", " ", mesa.regras.trailing ? "pico" : "início")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: recuperacao ? "rgba(255,92,122,0.07)" : C.panel,
+      border: `1px solid ${recuperacao ? C.down + "55" : C.line}`,
+      borderRadius: 14,
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: C.dim,
+      marginBottom: 6
+    }
+  }, "Gestão de risco ", recuperacao && /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.down,
+      fontWeight: 700
+    }
+  }, "· modo recuperação")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      lineHeight: 1.6
+    }
+  }, "Limite de perda hoje: ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: C.warn
+    }
+  }, usd(riscoDiaValor)), " (", mesa.regras.perdaDiaPct, "%).", /*#__PURE__*/React.createElement("br", null), "Risco conservador sugerido por trade:", " ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: C.cyan
+    }
+  }, usd(mesa.saldoInicial * 0.005)), " (0,5%).", recuperacao && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.down
+    }
+  }, "Estás abaixo de zero. Evita aumentar o lote para \"recuperar rápido\" — mantém o risco fixo e deixa o R:R trabalhar.")))), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 11.5,
+      color: C.dim,
+      lineHeight: 1.5,
+      margin: 0
+    }
+  }, "Estimativas com base nas regras que registaste. Confirma sempre os limites no dashboard da firma — as regras mudam e cada programa é diferente."));
+}
+
+/* ---------- Registar dias e trades ---------- */
+function RegistarDias({
+  mesa,
+  usd,
+  onUpdate
+}) {
+  const dias = diasDaFase(mesa);
+  const r = pnlMesa(mesa);
+
+  // mês em foco no calendário (começa no mês de hoje)
+  const [refMes, setRefMes] = useState(() => {
+    const h = new Date();
+    return {
+      ano: h.getFullYear(),
+      mes: h.getMonth()
+    };
+  });
+  const [diaAberto, setDiaAberto] = useState(null); // ISO do dia expandido
+
+  // alvo da etapa atual
+  const alvoPct = mesa.regras.targetPct[mesa.faseAtual - 1] || 0;
+  const bateuAlvo = alvoPct > 0 && r.pnlPct >= alvoPct;
+  const temMaisFases = mesa.faseAtual < mesa.regras.fases;
+
+  /* ---- escrever trades na fase atual ---- */
+  function gravarDias(novosDias) {
+    const porFase = {
+      ...(mesa.diasPorFase || {})
+    };
+    // migração: se vinha do mesa.dias antigo, traz para a fase 1
+    if (mesa.dias && Object.keys(mesa.dias).length && !porFase[1]) {
+      porFase[1] = mesa.dias;
+    }
+    porFase[mesa.faseAtual] = novosDias;
+    onUpdate({
+      diasPorFase: porFase,
+      dias: undefined
+    });
+  }
+  function addTrade(diaISO, nomeAtivo, valor) {
+    const v = parseFloat((valor || "").replace(",", "."));
+    if (isNaN(v)) return false;
+    const trade = {
+      id: uid(),
+      ativo: nomeAtivo,
+      resultado: v
+    };
+    const novos = {
+      ...dias,
+      [diaISO]: [...(dias[diaISO] || []), trade]
+    };
+    gravarDias(novos);
+    return true;
+  }
+  function removeTrade(diaISO, id) {
+    const novos = {
+      ...dias
+    };
+    novos[diaISO] = (novos[diaISO] || []).filter(t => t.id !== id);
+    if (novos[diaISO].length === 0) delete novos[diaISO];
+    gravarDias(novos);
+  }
+
+  /* ---- avançar de etapa (sugerido, confirmado pelo utilizador) ---- */
+  function avancarEtapa() {
+    const historico = [...(mesa.historico || [])];
+    historico.push({
+      fase: mesa.faseAtual,
+      pnl: r.pnl,
+      pnlPct: r.pnlPct,
+      dias: dias,
+      fechadaEm: hojeISO()
+    });
+    onUpdate({
+      historico,
+      faseAtual: mesa.faseAtual + 1
+    });
+    setDiaAberto(null);
+  }
+
+  /* ---- grelha do mês ---- */
+  const primeiroDia = new Date(refMes.ano, refMes.mes, 1);
+  const diasNoMes = new Date(refMes.ano, refMes.mes + 1, 0).getDate();
+  const offset = primeiroDia.getDay(); // 0=domingo
+  const celulas = [];
+  for (let i = 0; i < offset; i++) celulas.push(null);
+  for (let d = 1; d <= diasNoMes; d++) celulas.push(d);
+  function isoDe(d) {
+    return `${refMes.ano}-${String(refMes.mes + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  }
+  function mudarMes(delta) {
+    setRefMes(p => {
+      const nm = p.mes + delta;
+      const ano = p.ano + Math.floor(nm / 12);
+      const mes = (nm % 12 + 12) % 12;
+      return {
+        ano,
+        mes
+      };
+    });
+    setDiaAberto(null);
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 14,
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "baseline"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: C.dim,
+      textTransform: "uppercase",
+      letterSpacing: "0.08em"
+    }
+  }, faseRotulo(mesa), " · resultado"), alvoPct > 0 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: C.dim
+    }
+  }, "alvo +", alvoPct, "%")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "baseline",
+      gap: 10,
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'JetBrains Mono', monospace",
+      fontSize: 26,
+      fontWeight: 700,
+      color: r.pnl > 0 ? C.up : r.pnl < 0 ? C.down : C.ink
+    }
+  }, usd(r.pnl)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'JetBrains Mono', monospace",
+      fontSize: 16,
+      fontWeight: 700,
+      color: r.pnl > 0 ? C.up : r.pnl < 0 ? C.down : C.dim
+    }
+  }, pct(r.pnlPct))), alvoPct > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10
+    }
+  }, /*#__PURE__*/React.createElement(Barra, {
+    valor: Math.max(0, Math.min(100, r.pnlPct / alvoPct * 100)),
+    cor: bateuAlvo ? C.up : C.cyan
+  }))), bateuAlvo && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(61,220,132,0.08)",
+      border: `1px solid ${C.up}66`,
+      borderRadius: 14,
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      color: C.up,
+      marginBottom: 4
+    }
+  }, "🎯 Alvo da ", mesa.faseAtual === mesa.regras.fases ? "última etapa" : `etapa ${mesa.faseAtual}`, " atingido!"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13.5,
+      color: C.ink,
+      lineHeight: 1.5,
+      marginBottom: 12
+    }
+  }, temMaisFases ? `Se a firma confirmou a passagem, avança para a etapa ${mesa.faseAtual + 1}. O registo recomeça do zero (saldo volta a ${usd(mesa.saldoInicial)}) e esta etapa fica guardada como aprovada.` : `Se a firma confirmou, passas a conta real. O registo recomeça do zero e o desafio fica guardado como aprovado.`), /*#__PURE__*/React.createElement("button", {
+    onClick: avancarEtapa,
+    style: {
+      ...btnPrimario,
+      background: C.up,
+      width: "100%"
+    }
+  }, temMaisFases ? `Confirmar passagem → etapa ${mesa.faseAtual + 1}` : "Confirmar → conta real ✓")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 14,
+      padding: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => mudarMes(-1),
+    style: {
+      ...btnTexto,
+      color: C.cyan,
+      fontSize: 18
+    }
+  }, "‹"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 700,
+      fontSize: 15,
+      textTransform: "uppercase",
+      letterSpacing: "0.04em"
+    }
+  }, MESES[refMes.mes], " ", refMes.ano), /*#__PURE__*/React.createElement("button", {
+    onClick: () => mudarMes(1),
+    style: {
+      ...btnTexto,
+      color: C.cyan,
+      fontSize: 18
+    }
+  }, "›")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(7,1fr)",
+      gap: 5,
+      marginBottom: 5
+    }
+  }, ["D", "S", "T", "Q", "Q", "S", "S"].map((d, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      textAlign: "center",
+      fontSize: 10.5,
+      fontWeight: 700,
+      color: i === 0 || i === 6 ? C.warn : C.dim
+    }
+  }, d))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(7,1fr)",
+      gap: 5
+    }
+  }, celulas.map((d, i) => {
+    if (d === null) return /*#__PURE__*/React.createElement("div", {
+      key: `v${i}`
+    });
+    const iso = isoDe(d);
+    const trades = dias[iso] || [];
+    const totalDia = trades.reduce((a, t) => a + t.resultado, 0);
+    const temTrade = trades.length > 0;
+    const aberto = diaAberto === iso;
+    const dow = new Date(refMes.ano, refMes.mes, d).getDay();
+    const fds = dow === 0 || dow === 6;
+    return /*#__PURE__*/React.createElement("button", {
+      key: iso,
+      onClick: () => setDiaAberto(aberto ? null : iso),
+      style: {
+        aspectRatio: "1",
+        borderRadius: 9,
+        border: aberto ? `1.5px solid ${C.cyan}` : temTrade ? `1px solid ${totalDia >= 0 ? C.up + "66" : C.down + "66"}` : `1px solid ${C.line}`,
+        background: aberto ? C.cyanDim : temTrade ? totalDia >= 0 ? "rgba(61,220,132,0.10)" : "rgba(255,92,122,0.10)" : C.panel2,
+        color: C.ink,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
+        fontFamily: "inherit",
+        padding: 2,
+        position: "relative"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 13,
+        fontWeight: 600,
+        color: fds && !temTrade ? C.warn : C.ink
+      }
+    }, d), temTrade && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 8.5,
+        fontFamily: "'JetBrains Mono', monospace",
+        fontWeight: 700,
+        color: totalDia >= 0 ? C.up : C.down,
+        lineHeight: 1,
+        marginTop: 1
+      }
+    }, totalDia >= 0 ? "+" : "", Math.round(totalDia)));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.dim,
+      marginTop: 10,
+      lineHeight: 1.4
+    }
+  }, "Toca num dia para registar · verde = dia positivo · vermelho = negativo")), diaAberto && /*#__PURE__*/React.createElement(DiaExpandido, {
+    diaISO: diaAberto,
+    trades: dias[diaAberto] || [],
+    saldoInicial: mesa.saldoInicial,
+    usd: usd,
+    onAdd: addTrade,
+    onRemove: removeTrade,
+    onFechar: () => setDiaAberto(null)
+  }), (mesa.historico || []).length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 14,
+      padding: 14
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: tituloSeccao
+  }, "Etapas aprovadas"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 8
+    }
+  }, mesa.historico.map((h, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "8px 0",
+      borderTop: i > 0 ? `1px solid ${C.line}` : "none",
+      fontSize: 14
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.ink
+    }
+  }, "✓ Etapa ", h.fase, " ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.dim,
+      fontSize: 12
+    }
+  }, "· ", fmtData(h.fechadaEm))), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'JetBrains Mono', monospace",
+      fontWeight: 700,
+      color: C.up
+    }
+  }, pct(h.pnlPct)))))));
+}
+
+/* ---------- painel expandido de um dia (ativo + valor) ---------- */
+function DiaExpandido({
+  diaISO,
+  trades,
+  saldoInicial,
+  usd,
+  onAdd,
+  onRemove,
+  onFechar
+}) {
+  const [ativo, setAtivo] = useState(ATIVOS[0]);
+  const [ativoOutro, setAtivoOutro] = useState("");
+  const [valor, setValor] = useState("");
+  const [sinal, setSinal] = useState("ganho"); // ganho | perda
+
+  const totalDia = trades.reduce((a, t) => a + t.resultado, 0);
+  const pctDia = totalDia / saldoInicial * 100;
+  function submeter() {
+    const nome = ativo === "Outro" ? ativoOutro.trim().toUpperCase() || "Outro" : ativo;
+    // valor absoluto, com o sinal a vir dos botões Ganho/Perda
+    const abs = Math.abs(parseFloat((valor || "").replace(",", ".")));
+    if (isNaN(abs)) return;
+    const valorFinal = sinal === "perda" ? -abs : abs;
+    if (onAdd(diaISO, nome, String(valorFinal))) {
+      setValor("");
+      setAtivoOutro("");
+    }
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.panel,
+      border: `1.5px solid ${C.cyan}66`,
+      borderRadius: 14,
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 700,
+      fontSize: 16
+    }
+  }, fmtData(diaISO)), /*#__PURE__*/React.createElement("button", {
+    onClick: onFechar,
+    style: {
+      ...btnTexto,
+      color: C.dim
+    }
+  }, "fechar ×")), trades.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      background: C.panel2,
+      borderRadius: 10,
+      padding: "8px 12px",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: C.dim
+    }
+  }, "Total do dia"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "flex",
+      gap: 10,
+      alignItems: "baseline"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'JetBrains Mono', monospace",
+      fontWeight: 700,
+      color: totalDia > 0 ? C.up : totalDia < 0 ? C.down : C.ink
+    }
+  }, usd(totalDia)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'JetBrains Mono', monospace",
+      fontSize: 13,
+      fontWeight: 700,
+      color: totalDia > 0 ? C.up : totalDia < 0 ? C.down : C.dim
+    }
+  }, pct(pctDia)))), trades.map(t => {
+    const tpct = t.resultado / saldoInicial * 100;
+    return /*#__PURE__*/React.createElement("div", {
+      key: t.id,
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "7px 0",
+        borderTop: `1px solid ${C.line}`,
+        fontSize: 14
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: C.dim
+      }
+    }, t.ativo), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 12
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: "'JetBrains Mono', monospace",
+        fontSize: 11,
+        color: C.dim
+      }
+    }, pct(tpct)), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: "'JetBrains Mono', monospace",
+        fontWeight: 600,
+        color: t.resultado > 0 ? C.up : t.resultado < 0 ? C.down : C.ink
+      }
+    }, usd(t.resultado)), /*#__PURE__*/React.createElement("button", {
+      onClick: () => onRemove(diaISO, t.id),
+      style: {
+        ...btnTexto,
+        color: C.dim,
+        padding: 2
+      }
+    }, "×")));
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 10,
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement(Campo, {
+    label: "Ativo"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: ativo,
+    onChange: e => setAtivo(e.target.value),
+    style: inp
+  }, ATIVOS.map(a => /*#__PURE__*/React.createElement("option", {
+    key: a,
+    value: a
+  }, a)))), ativo === "Outro" && /*#__PURE__*/React.createElement(Campo, {
+    label: "Qual ativo?"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: ativoOutro,
+    onChange: e => setAtivoOutro(e.target.value),
+    placeholder: "Ex.: XAUCHF, SPX, SOLUSD…",
+    style: inp
+  })), /*#__PURE__*/React.createElement(Campo, {
+    label: "Foi ganho ou perda?"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setSinal("ganho"),
+    style: {
+      background: sinal === "ganho" ? "rgba(61,220,132,0.16)" : C.panel2,
+      border: `1.5px solid ${sinal === "ganho" ? C.up : C.line}`,
+      color: sinal === "ganho" ? C.up : C.dim,
+      borderRadius: 10,
+      padding: "11px 0",
+      fontWeight: 700,
+      fontSize: 15,
+      fontFamily: "inherit",
+      cursor: "pointer"
+    }
+  }, "▲ Ganho"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setSinal("perda"),
+    style: {
+      background: sinal === "perda" ? "rgba(255,92,122,0.16)" : C.panel2,
+      border: `1.5px solid ${sinal === "perda" ? C.down : C.line}`,
+      color: sinal === "perda" ? C.down : C.dim,
+      borderRadius: 10,
+      padding: "11px 0",
+      fontWeight: 700,
+      fontSize: 15,
+      fontFamily: "inherit",
+      cursor: "pointer"
+    }
+  }, "▼ Perda"))), /*#__PURE__*/React.createElement(Campo, {
+    label: "Valor ($) — só o número"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      position: "absolute",
+      left: 12,
+      top: "50%",
+      transform: "translateY(-50%)",
+      fontFamily: "'JetBrains Mono', monospace",
+      fontWeight: 700,
+      fontSize: 16,
+      color: sinal === "perda" ? C.down : C.up,
+      pointerEvents: "none"
+    }
+  }, sinal === "perda" ? "−" : "+"), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    inputMode: "decimal",
+    value: valor,
+    onChange: e => setValor(e.target.value),
+    placeholder: "150",
+    style: {
+      ...inp,
+      paddingLeft: 30
+    }
+  }))), /*#__PURE__*/React.createElement("button", {
+    onClick: submeter,
+    style: btnPrimario
+  }, "Adicionar ao dia")));
+}
+
+/* ---------- Saques ---------- */
+function Saques({
+  mesa,
+  usd,
+  eur,
+  onUpdate
+}) {
+  const [data, setData] = useState(hojeISO());
+  const [valor, setValor] = useState("");
+  const saques = mesa.saques || [];
+  const total = saques.reduce((a, s) => a + s.valor, 0);
+  function add() {
+    const v = parseFloat((valor || "").replace(",", "."));
+    if (isNaN(v) || v <= 0) return;
+    onUpdate({
+      saques: [...saques, {
+        id: uid(),
+        data,
+        valor: v
+      }]
+    });
+    setValor("");
+  }
+  function remove(id) {
+    onUpdate({
+      saques: saques.filter(s => s.id !== id)
+    });
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement(CartaoNumero, {
+    rotulo: "Total sacado nesta mesa",
+    valor: usd(total),
+    sub: eur(total),
+    cor: C.cyan
+  }), /*#__PURE__*/React.createElement("section", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 14,
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: tituloSeccao
+  }, "Registar saque"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr auto",
+      gap: 10,
+      alignItems: "end"
+    }
+  }, /*#__PURE__*/React.createElement(Campo, {
+    label: "Data"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: data,
+    onChange: e => setData(e.target.value),
+    style: inp
+  })), /*#__PURE__*/React.createElement(Campo, {
+    label: "Valor ($)"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    inputMode: "decimal",
+    value: valor,
+    onChange: e => setValor(e.target.value),
+    placeholder: "500",
+    style: inp
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: add,
+    style: {
+      ...btnPrimario,
+      padding: "10px 16px"
+    }
+  }, "+"))), saques.length === 0 ? /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: C.dim,
+      textAlign: "center",
+      fontSize: 14
+    }
+  }, "Ainda não registaste saques.") : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 8
+    }
+  }, [...saques].sort((a, b) => a.data < b.data ? 1 : -1).map(s => /*#__PURE__*/React.createElement("div", {
+    key: s.id,
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 11,
+      padding: "11px 14px"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14
+    }
+  }, fmtData(s.data)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'JetBrains Mono', monospace",
+      fontWeight: 700,
+      color: C.up
+    }
+  }, usd(s.valor)), /*#__PURE__*/React.createElement("button", {
+    onClick: () => remove(s.id),
+    style: {
+      ...btnTexto,
+      color: C.dim
+    }
+  }, "×"))))));
+}
+
+/* ---------- Regras (editáveis) ---------- */
+function RegrasMesa({
+  mesa,
+  usd,
+  onUpdate,
+  onRemover
+}) {
+  const reg = mesa.regras;
+  const setReg = patch => onUpdate({
+    regras: {
+      ...reg,
+      ...patch
+    }
+  });
+  const num = v => isNaN(parseFloat(v)) ? 0 : parseFloat(v);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement("section", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 14,
+      padding: 16,
+      display: "grid",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: tituloSeccao
+  }, "Regras da mesa"), /*#__PURE__*/React.createElement(Campo, {
+    label: "Etiqueta"
+  }, /*#__PURE__*/React.createElement("input", {
+    value: mesa.etiqueta,
+    onChange: e => onUpdate({
+      etiqueta: e.target.value
+    }),
+    style: inp
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement(Campo, {
+    label: "Saldo inicial ($)"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: mesa.saldoInicial,
+    onChange: e => onUpdate({
+      saldoInicial: e.target.value
+    }),
+    onBlur: e => onUpdate({
+      saldoInicial: num(e.target.value)
+    }),
+    style: inp
+  })), /*#__PURE__*/React.createElement(Campo, {
+    label: "Nº de etapas"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: reg.fases,
+    onChange: e => setReg({
+      fases: num(e.target.value)
+    }),
+    style: inp
+  })), /*#__PURE__*/React.createElement(Campo, {
+    label: "Etapa atual"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: mesa.faseAtual,
+    onChange: e => onUpdate({
+      faseAtual: Math.max(1, num(e.target.value))
+    }),
+    style: inp
+  })), /*#__PURE__*/React.createElement(Campo, {
+    label: "Meta de lucro (%)"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: reg.targetPct[mesa.faseAtual - 1] ?? 0,
+    onChange: e => {
+      const t = [...reg.targetPct];
+      t[mesa.faseAtual - 1] = num(e.target.value);
+      setReg({
+        targetPct: t
+      });
+    },
+    style: inp
+  })), /*#__PURE__*/React.createElement(Campo, {
+    label: "Perda diária (%)"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: reg.perdaDiaPct,
+    onChange: e => setReg({
+      perdaDiaPct: num(e.target.value)
+    }),
+    style: inp
+  })), /*#__PURE__*/React.createElement(Campo, {
+    label: "Perda total (%)"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: reg.perdaTotalPct,
+    onChange: e => setReg({
+      perdaTotalPct: num(e.target.value)
+    }),
+    style: inp
+  }))), /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      fontSize: 14,
+      color: C.dim
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: reg.trailing,
+    onChange: e => setReg({
+      trailing: e.target.checked
+    }),
+    style: {
+      accentColor: C.cyan,
+      width: 17,
+      height: 17
+    }
+  }), "Drawdown trailing (segue o pico de saldo)")), /*#__PURE__*/React.createElement("button", {
+    onClick: onRemover,
+    style: {
+      ...btnTexto,
+      color: C.down,
+      justifySelf: "center"
+    }
+  }, "Eliminar esta mesa"));
+}
+
+/* ============================================================
+   CÁLCULOS
+   ============================================================ */
+/* trades da etapa atual (cada etapa recomeça do zero) */
+function diasDaFase(mesa) {
+  const porFase = mesa.diasPorFase || {};
+  // compatibilidade: se ainda existir mesa.dias antigo, usa-o na fase 1
+  if (mesa.dias && Object.keys(mesa.dias).length && !porFase[1]) {
+    return mesa.dias;
+  }
+  return porFase[mesa.faseAtual] || {};
+}
+function pnlMesa(mesa) {
+  const dias = diasDaFase(mesa);
+  let pico = mesa.saldoInicial;
+  const datas = Object.keys(dias).sort();
+  let saldo = mesa.saldoInicial;
+  for (const d of datas) {
+    const totalDia = (dias[d] || []).reduce((a, t) => a + t.resultado, 0);
+    saldo += totalDia;
+    if (saldo > pico) pico = saldo;
+  }
+  const pnl = saldo - mesa.saldoInicial;
+  const pnlPct = pnl / mesa.saldoInicial * 100;
+  const baseTotal = mesa.regras.trailing ? pico : mesa.saldoInicial;
+  const limiteTotal = baseTotal - mesa.saldoInicial * (mesa.regras.perdaTotalPct / 100);
+  return {
+    pnl,
+    pnlPct,
+    saldoAtual: saldo,
+    pico,
+    limiteTotal
+  };
+}
+function faseRotulo(mesa) {
+  if (mesa.faseAtual > mesa.regras.fases) return "Conta real ✓";
+  if (mesa.regras.fases === 0) return "Conta real";
+  return `Etapa ${mesa.faseAtual}/${mesa.regras.fases}`;
+}
+
+/* ============================================================
+   MODAIS
+   ============================================================ */
+function ModalNovaConta({
+  onFechar,
+  onCriar
+}) {
+  const [nome, setNome] = useState("");
+  const [tipo, setTipo] = useState("prop");
+  return /*#__PURE__*/React.createElement(Modal, {
+    onFechar: onFechar,
+    titulo: "Nova conta"
+  }, /*#__PURE__*/React.createElement(Campo, {
+    label: "Tipo"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, [["prop", "Prop firm"], ["pessoal", "Conta pessoal"]].map(([id, label]) => /*#__PURE__*/React.createElement("button", {
+    key: id,
+    onClick: () => setTipo(id),
+    style: {
+      flex: 1,
+      background: tipo === id ? C.cyanDim : C.panel2,
+      border: `1px solid ${tipo === id ? C.cyan + "88" : C.line}`,
+      color: tipo === id ? C.cyan : C.ink,
+      borderRadius: 10,
+      padding: "10px 0",
+      fontWeight: 600,
+      fontFamily: "inherit",
+      cursor: "pointer"
+    }
+  }, label)))), /*#__PURE__*/React.createElement(Campo, {
+    label: "Nome"
+  }, /*#__PURE__*/React.createElement("input", {
+    value: nome,
+    onChange: e => setNome(e.target.value),
+    placeholder: tipo === "prop" ? "Ex.: Hantec, FTMO…" : "Ex.: Conta cent pessoal",
+    style: inp
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: () => nome.trim() && onCriar(nome.trim(), tipo),
+    disabled: !nome.trim(),
+    style: {
+      ...btnPrimario,
+      opacity: nome.trim() ? 1 : 0.5
+    }
+  }, "Criar conta"));
+}
+function ModalNovaMesa({
+  onFechar,
+  onCriar
+}) {
+  const [firma, setFirma] = useState("hantec");
+  const [programa, setPrograma] = useState("Endurance (3 etapas)");
+  const [saldo, setSaldo] = useState(200000);
+  const [etiqueta, setEtiqueta] = useState("");
+  const progsDisponiveis = Object.keys(MODELOS_FIRMAS[firma]?.programas || {});
+  const regrasBase = MODELOS_FIRMAS[firma]?.programas[programa];
+  const nomeFirma = MODELOS_FIRMAS[firma]?.nome || "";
+
+  // etiqueta sugerida automática
+  const etiquetaSugerida = `${programa.split(" (")[0]} ${saldo >= 1000 ? saldo / 1000 + "k" : saldo}`;
+  function criar() {
+    const reg = regrasBase || {
+      fases: 1,
+      targetPct: [8, 0, 0],
+      perdaDiaPct: 5,
+      perdaTotalPct: 10,
+      trailing: false,
+      minDias: 0
+    };
+    onCriar({
+      etiqueta: etiqueta.trim() || etiquetaSugerida,
+      saldoInicial: parseFloat(saldo) || 0,
+      faseAtual: 1,
+      regras: {
+        fases: reg.fases,
+        targetPct: [...reg.targetPct],
+        perdaDiaPct: reg.perdaDiaPct,
+        perdaTotalPct: reg.perdaTotalPct,
+        trailing: reg.trailing,
+        minDias: reg.minDias
+      }
+    });
+  }
+  return /*#__PURE__*/React.createElement(Modal, {
+    onFechar: onFechar,
+    titulo: "Nova mesa"
+  }, /*#__PURE__*/React.createElement(Campo, {
+    label: "Firma (modelo de regras)"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: firma,
+    onChange: e => {
+      setFirma(e.target.value);
+      const p = Object.keys(MODELOS_FIRMAS[e.target.value].programas)[0];
+      setPrograma(p);
+    },
+    style: inp
+  }, Object.entries(MODELOS_FIRMAS).map(([id, f]) => /*#__PURE__*/React.createElement("option", {
+    key: id,
+    value: id
+  }, f.nome)))), /*#__PURE__*/React.createElement(Campo, {
+    label: "Programa"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: programa,
+    onChange: e => setPrograma(e.target.value),
+    style: inp
+  }, progsDisponiveis.map(p => /*#__PURE__*/React.createElement("option", {
+    key: p,
+    value: p
+  }, p)))), regrasBase?.aConfirmar && /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 12,
+      color: C.warn,
+      margin: "0 0 4px"
+    }
+  }, "⚠ Valores por confirmar no site da firma — ajusta nas Regras depois de criar."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement(Campo, {
+    label: "Tamanho da conta ($)"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: saldo,
+    onChange: e => setSaldo(Number(e.target.value)),
+    style: inp
+  }, TAMANHOS.map(t => /*#__PURE__*/React.createElement("option", {
+    key: t,
+    value: t
+  }, t >= 1000 ? `$${t / 1000}k` : `$${t}`)))), /*#__PURE__*/React.createElement(Campo, {
+    label: "Etiqueta"
+  }, /*#__PURE__*/React.createElement("input", {
+    value: etiqueta,
+    onChange: e => setEtiqueta(e.target.value),
+    placeholder: etiquetaSugerida,
+    style: inp
+  }))), regrasBase && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      color: C.dim,
+      lineHeight: 1.6
+    }
+  }, regrasBase.fases > 0 ? `${regrasBase.fases} etapas` : "Sem etapas (funded)", " ·", " ", regrasBase.targetPct[0] > 0 ? `alvo ${regrasBase.targetPct[0]}% · ` : "", "perda dia ", regrasBase.perdaDiaPct, "% · perda total ", regrasBase.perdaTotalPct, "%", regrasBase.trailing ? " (trailing)" : " (estático)"), /*#__PURE__*/React.createElement("button", {
+    onClick: criar,
+    style: btnPrimario
+  }, "Criar mesa"));
+}
+
+/* ============================================================
+   COMPONENTES BASE
+   ============================================================ */
+function Cabecalho({
+  titulo,
+  destaque,
+  sub
+}) {
+  return /*#__PURE__*/React.createElement("header", {
+    style: {
+      padding: "18px 16px 16px",
+      borderBottom: `1px solid ${C.line}`,
+      background: `linear-gradient(180deg, ${C.panel} 0%, ${C.bg} 100%)`,
+      marginBottom: 16
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1061,1356 +2141,211 @@ function PersonTurnos() {
       width: 34,
       height: 34,
       borderRadius: 9,
-      background: C.amberDim,
-      border: `1px solid ${C.amber}55`,
+      background: C.cyanDim,
+      border: `1px solid ${C.cyan}55`,
       display: "grid",
       placeItems: "center",
-      fontFamily: "'Barlow Condensed', sans-serif",
+      fontFamily: "'JetBrains Mono', monospace",
       fontWeight: 700,
-      fontSize: 17,
-      color: C.amber
+      color: C.cyan,
+      fontSize: 18
     }
   }, "P"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: "'Barlow Condensed', sans-serif",
       fontWeight: 700,
       fontSize: 22,
-      letterSpacing: "0.04em",
+      letterSpacing: "-0.01em",
       lineHeight: 1
     }
-  }, "PERSON", /*#__PURE__*/React.createElement("span", {
+  }, titulo, /*#__PURE__*/React.createElement("span", {
     style: {
-      color: C.amber
+      color: C.cyan
     }
-  }, "TURNOS")), /*#__PURE__*/React.createElement("div", {
+  }, destaque)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: C.muted,
+      color: C.dim,
       letterSpacing: "0.1em",
       textTransform: "uppercase"
     }
-  }, "Folha de servi\xE7o \xB7 Seguran\xE7a privada"))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 16,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      background: C.card2,
-      border: `1px solid ${C.border}`,
-      borderRadius: 12,
-      padding: "8px 8px"
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setOffset(o => o - 1),
-    "aria-label": "Per\xEDodo anterior",
-    style: btnSeta
-  }, "\u2039"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      textAlign: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: "'Barlow Condensed', sans-serif",
-      fontWeight: 600,
-      fontSize: 18,
-      fontVariantNumeric: "tabular-nums"
-    }
-  }, tituloPeriodo), offset !== 0 && /*#__PURE__*/React.createElement("button", {
-    onClick: () => setOffset(0),
-    style: {
-      background: "none",
-      border: "none",
-      color: C.amber,
-      fontSize: 12,
-      cursor: "pointer",
-      padding: 0
-    }
-  }, "voltar ao per\xEDodo atual")), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setOffset(o => o + 1),
-    "aria-label": "Per\xEDodo seguinte",
-    style: btnSeta
-  }, "\u203A"))), /*#__PURE__*/React.createElement("main", {
-    style: {
-      padding: 18,
-      maxWidth: 560,
-      margin: "0 auto"
-    }
-  }, !carregado ? /*#__PURE__*/React.createElement("p", {
-    style: {
-      color: C.muted,
-      textAlign: "center",
-      marginTop: 40
-    }
-  }, "A carregar os teus registos\u2026") : aba === "folha" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr",
-      gap: 8,
-      marginBottom: 14
-    }
-  }, /*#__PURE__*/React.createElement(MiniStat, {
-    rotulo: "Horas",
-    valor: fmtHoras(resumo.totalMin)
-  }), /*#__PURE__*/React.createElement(MiniStat, {
-    rotulo: "Dias",
-    valor: resumo.dias
-  }), /*#__PURE__*/React.createElement(MiniStat, {
-    rotulo: "L\xEDquido est.",
-    valor: eur(resumo.liquido),
-    cor: C.green
-  })), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontSize: 12.5,
-      color: C.muted,
-      lineHeight: 1.5,
-      margin: "0 0 12px"
-    }
-  }, "Preenche entrada e sa\xEDda em cada dia. Se a sa\xEDda for antes da entrada (ex.: 20:00 \u2192 06:00), conta como sa\xEDda no dia seguinte. Dias em branco ficam como folga."), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      try {
-        const url = gerarImagemFolha({
-          titulo: tituloPeriodo,
-          dias: diasDoPeriodo,
-          porData,
-          cfg,
-          resumo,
-          mapaFeriados,
-          isFeriado
-        });
-        setImgExport(url);
-      } catch (err) {
-        console.error("Falha ao gerar imagem", err);
-      }
-    },
-    style: {
-      ...btnPrimario,
-      width: "100%",
-      marginBottom: 14,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 8
-    }
-  }, "\uD83D\uDCBE Guardar imagem (escala + recibo)"), /*#__PURE__*/React.createElement("datalist", {
-    id: "locais-folha"
-  }, locais.map(l => /*#__PURE__*/React.createElement("option", {
-    key: l,
-    value: l
-  }))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gap: 8
-    }
-  }, diasDoPeriodo.map(d => /*#__PURE__*/React.createElement(DiaLinha, {
-    key: d,
-    data: d,
-    items: porData[d] || [],
-    cfg: cfg,
-    feriadoNome: mapaFeriados.get(d),
-    isFeriado: isFeriado,
-    onCriar: criarEntrada,
-    onAtualizar: atualizarEntrada,
-    onApagar: apagar,
-    onAlternarVale: alternarValeDia
-  })))) : aba === "registos" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr",
-      gap: 8,
-      marginBottom: 16
-    }
-  }, /*#__PURE__*/React.createElement(MiniStat, {
-    rotulo: "Horas",
-    valor: fmtHoras(resumo.totalMin)
-  }), /*#__PURE__*/React.createElement(MiniStat, {
-    rotulo: "Dias",
-    valor: resumo.dias
-  }), /*#__PURE__*/React.createElement(MiniStat, {
-    rotulo: "L\xEDquido est.",
-    valor: eur(resumo.liquido),
-    cor: C.green
-  })), /*#__PURE__*/React.createElement("section", {
-    style: {
-      background: C.card,
-      border: `1px solid ${C.border}`,
-      borderRadius: 14,
-      padding: 16,
-      marginBottom: 18
-    }
-  }, /*#__PURE__*/React.createElement("h2", {
-    style: tituloSeccao
-  }, "Registar turno"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gap: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
-    style: {
-      display: "block",
-      fontSize: 11,
-      letterSpacing: "0.08em",
-      textTransform: "uppercase",
-      color: C.muted,
-      marginBottom: 6,
-      fontWeight: 600
-    }
-  }, "Dias (toca para selecionar v\xE1rios)"), /*#__PURE__*/React.createElement(SeletorDias, {
-    dias: diasDoPeriodo,
-    selecionados: fDatas,
-    porData: porData,
-    mapaFeriados: mapaFeriados,
-    onToggle: d => setFDatas(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d])
-  }), fDatas.length > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginTop: 8
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 13,
-      color: C.amber,
-      fontWeight: 600
-    }
-  }, fDatas.length, " ", fDatas.length === 1 ? "dia selecionado" : "dias selecionados"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setFDatas([]),
-    style: {
-      ...btnTexto,
-      color: C.muted
-    }
-  }, "Limpar"))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr",
-      gap: 12
-    }
-  }, /*#__PURE__*/React.createElement(Campo, {
-    label: "Entrada"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "time",
-    value: fEntrada,
-    onChange: e => setFEntrada(e.target.value),
-    style: inputStyle
-  })), /*#__PURE__*/React.createElement(Campo, {
-    label: "Sa\xEDda"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "time",
-    value: fSaida,
-    onChange: e => setFSaida(e.target.value),
-    style: inputStyle
-  }))), /*#__PURE__*/React.createElement(Campo, {
-    label: "Local"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    value: fLocal,
-    onChange: e => setFLocal(e.target.value),
-    placeholder: "Ex.: Centro Comercial, Obra Norte\u2026",
-    list: "locais",
-    style: inputStyle
-  }), /*#__PURE__*/React.createElement("datalist", {
-    id: "locais"
-  }, locais.map(l => /*#__PURE__*/React.createElement("option", {
-    key: l,
-    value: l
-  })))), /*#__PURE__*/React.createElement(PreVisualizacao, {
-    data: fDatas.length > 0 ? [...fDatas].sort()[0] : hojeISO(),
-    entrada: fEntrada,
-    saida: fSaida,
-    cfg: cfg,
-    isFeriado: isFeriado
-  }), /*#__PURE__*/React.createElement("label", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-      fontSize: 14,
-      color: C.muted,
-      cursor: "pointer"
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: fVale,
-    onChange: e => setFVale(e.target.checked),
-    style: {
-      accentColor: C.amber,
-      width: 17,
-      height: 17
-    }
-  }), "Vale-refei\xE7\xE3o nestes dias (", eur(cfg.valeRefeicao), ")"), /*#__PURE__*/React.createElement("button", {
-    onClick: adicionarTurno,
-    disabled: fDatas.length === 0,
-    style: {
-      ...btnPrimario,
-      opacity: fDatas.length === 0 ? 0.45 : 1,
-      cursor: fDatas.length === 0 ? "default" : "pointer"
-    }
-  }, fDatas.length <= 1 ? "Adicionar turno" : `Adicionar turno em ${fDatas.length} dias`), flash && /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 13.5,
-      color: C.green,
-      fontWeight: 600
-    }
-  }, flash))), /*#__PURE__*/React.createElement("h2", {
-    style: {
-      ...tituloSeccao,
-      marginBottom: 10
-    }
-  }, "Turnos do per\xEDodo", " ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.muted,
-      fontWeight: 400
-    }
-  }, "(", doPeriodo.length, ")")), doPeriodo.length === 0 ? /*#__PURE__*/React.createElement("p", {
-    style: {
-      color: C.muted,
-      fontSize: 14,
-      textAlign: "center",
-      padding: "24px 0"
-    }
-  }, "Ainda n\xE3o h\xE1 turnos neste per\xEDodo. Regista o primeiro acima.") : /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gap: 10
-    }
-  }, doPeriodo.map(e => /*#__PURE__*/React.createElement(CartaoTurno, {
-    key: e.id,
-    e: e,
-    cfg: cfg,
-    isFeriado: isFeriado,
-    aConfirmar: confirmar === e.id,
-    onPedirApagar: () => setConfirmar(e.id),
-    onCancelar: () => setConfirmar(null),
-    onApagar: () => apagar(e.id)
-  })))) : aba === "resumo" ? /*#__PURE__*/React.createElement(ResumoPeriodo, {
-    resumo: resumo,
-    cfg: cfg,
-    titulo: tituloPeriodo
-  }) : /*#__PURE__*/React.createElement(Definicoes, {
-    cfg: cfg,
-    setCfg: setCfg,
-    num: num,
-    feriadosExtra: feriadosExtra,
-    setFeriadosExtra: setFeriadosExtra
-  })), imgExport && /*#__PURE__*/React.createElement("div", {
-    onClick: () => setImgExport(null),
-    style: {
-      position: "fixed",
-      inset: 0,
-      background: "rgba(5,8,16,0.88)",
-      zIndex: 50,
-      display: "flex",
-      flexDirection: "column",
-      padding: "16px 14px calc(16px + env(safe-area-inset-bottom))"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: ev => ev.stopPropagation(),
-    style: {
-      flex: 1,
-      minHeight: 0,
-      display: "flex",
-      flexDirection: "column",
-      gap: 12,
-      maxWidth: 560,
-      width: "100%",
-      margin: "0 auto"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      minHeight: 0,
-      overflow: "auto",
-      borderRadius: 12,
-      border: `1px solid ${C.border}`
-    }
-  }, /*#__PURE__*/React.createElement("img", {
-    src: imgExport,
-    alt: "Folha de servi\xE7o e recibo do per\xEDodo",
-    style: {
-      width: "100%",
-      display: "block"
-    }
-  })), /*#__PURE__*/React.createElement("p", {
-    style: {
-      margin: 0,
-      fontSize: 13,
-      color: C.muted,
-      textAlign: "center"
-    }
-  }, "Mant\xE9m o dedo na imagem para a guardar na galeria, ou usa os bot\xF5es abaixo."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr",
-      gap: 10
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: async () => {
-      try {
-        // converter dataURL → Blob sem fetch (funciona em qualquer ambiente)
-        const base64 = imgExport.split(",")[1];
-        const bin = atob(base64);
-        const bytes = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-        const blob = new Blob([bytes], {
-          type: "image/png"
-        });
-        const nome = `PersonTurnos_${tituloPeriodo.replaceAll(" ", "")}.png`;
-        const ficheiro = new File([blob], nome, {
-          type: "image/png"
-        });
-        if (navigator.share && navigator.canShare && navigator.canShare({
-          files: [ficheiro]
-        })) {
-          await navigator.share({
-            files: [ficheiro],
-            title: "PersonTurnos — folha de serviço"
-          });
-        } else {
-          // sem partilha disponível: descarregar diretamente
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = nome;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          setTimeout(() => URL.revokeObjectURL(url), 4000);
-        }
-      } catch (err) {
-        if (err?.name !== "AbortError") console.error("Falha ao partilhar", err);
-      }
-    },
-    style: {
-      ...btnPrimario,
-      padding: "13px 8px"
-    }
-  }, "Partilhar"), /*#__PURE__*/React.createElement("a", {
-    href: imgExport,
-    download: `PersonTurnos_${tituloPeriodo.replaceAll(" ", "")}.png`,
-    style: {
-      background: C.card2,
-      border: `1px solid ${C.border}`,
-      color: C.text,
-      borderRadius: 11,
-      padding: "13px 8px",
-      fontSize: 15,
-      fontWeight: 700,
-      textAlign: "center",
-      textDecoration: "none",
-      display: "block"
-    }
-  }, "Transferir"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setImgExport(null),
-    style: {
-      background: C.card2,
-      border: `1px solid ${C.border}`,
-      color: C.text,
-      borderRadius: 11,
-      padding: "13px 8px",
-      fontSize: 15,
-      fontWeight: 700,
-      fontFamily: "inherit",
-      cursor: "pointer"
-    }
-  }, "Fechar")))), /*#__PURE__*/React.createElement("nav", {
-    style: {
-      position: "fixed",
-      bottom: 0,
-      left: 0,
-      right: 0,
-      background: C.card,
-      borderTop: `1px solid ${C.border}`,
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr 1fr",
-      padding: "8px 10px calc(8px + env(safe-area-inset-bottom))",
-      gap: 6
-    }
-  }, [["folha", "Folha"], ["registos", "Registos"], ["resumo", "Resumo"], ["definicoes", "Ajustes"]].map(([id, nome]) => /*#__PURE__*/React.createElement("button", {
-    key: id,
-    onClick: () => setAba(id),
-    style: {
-      background: aba === id ? C.amberDim : "transparent",
-      border: aba === id ? `1px solid ${C.amber}55` : "1px solid transparent",
-      color: aba === id ? C.amber : C.muted,
-      borderRadius: 10,
-      padding: "9px 0",
-      fontSize: 14,
-      fontWeight: 600,
-      fontFamily: "inherit",
-      cursor: "pointer"
-    }
-  }, nome))));
+  }, sub))));
 }
-
-/* ---------------- subcomponentes ---------------- */
-
-const btnSeta = {
-  background: "transparent",
-  border: "none",
-  color: C.text,
-  fontSize: 26,
-  lineHeight: 1,
-  width: 40,
-  height: 40,
-  borderRadius: 10,
-  cursor: "pointer"
-};
-const btnPrimario = {
-  background: C.amber,
-  color: "#1A1305",
-  border: "none",
-  borderRadius: 11,
-  padding: "13px 16px",
-  fontSize: 15,
-  fontWeight: 700,
-  fontFamily: "inherit",
-  cursor: "pointer"
-};
-const tituloSeccao = {
-  fontFamily: "'Barlow Condensed', sans-serif",
-  fontWeight: 600,
-  fontSize: 17,
-  letterSpacing: "0.06em",
-  textTransform: "uppercase",
-  color: C.text,
-  margin: "0 0 12px"
-};
-
-/* Grelha de dias do período com seleção múltipla.
-   Mostra os dias agrupados por mês; um ponto indica dias já preenchidos. */
-function SeletorDias({
-  dias,
-  selecionados,
-  porData,
-  mapaFeriados,
-  onToggle
+function CartaoNumero({
+  rotulo,
+  valor,
+  sub,
+  cor
 }) {
-  // agrupar por mês mantendo a ordem
-  const grupos = [];
-  for (const iso of dias) {
-    const [y, m] = iso.split("-").map(Number);
-    const chave = `${y}-${m}`;
-    if (!grupos.length || grupos[grupos.length - 1].chave !== chave) {
-      grupos.push({
-        chave,
-        rotulo: `${MESES[m - 1].toUpperCase()} ${y}`,
-        dias: []
-      });
-    }
-    grupos[grupos.length - 1].dias.push(iso);
-  }
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      background: C.card2,
-      border: `1px solid ${C.border}`,
-      borderRadius: 11,
-      padding: "10px 10px 12px"
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 14,
+      padding: "13px 14px"
     }
-  }, grupos.map(g => /*#__PURE__*/React.createElement("div", {
-    key: g.chave
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 10.5,
-      fontWeight: 700,
-      letterSpacing: "0.1em",
-      color: C.muted,
-      margin: "6px 2px 6px"
-    }
-  }, g.rotulo), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "repeat(7, 1fr)",
-      gap: 6
-    }
-  }, g.dias.map(iso => {
-    const dia = Number(iso.slice(8, 10));
-    const sel = selecionados.includes(iso);
-    const ocupado = (porData[iso] || []).length > 0;
-    const feriado = mapaFeriados.has(iso);
-    const [yy, mm, dd] = iso.split("-").map(Number);
-    const ds = new Date(yy, mm - 1, dd).getDay();
-    const fds = ds === 0 || ds === 6;
-    const iniciais = ["D", "S", "T", "Q", "Q", "S", "S"];
-    return /*#__PURE__*/React.createElement("button", {
-      key: iso,
-      onClick: () => onToggle(iso),
-      "aria-pressed": sel,
-      style: {
-        position: "relative",
-        background: sel ? C.amber : "transparent",
-        border: `1.5px solid ${sel ? C.amber : feriado ? `${C.red}77` : C.border}`,
-        color: sel ? "#1A1305" : fds ? "#C7CEE0" : C.text,
-        borderRadius: 9,
-        padding: "5px 0 9px",
-        fontFamily: "inherit",
-        cursor: "pointer",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 1
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 9,
-        fontWeight: 700,
-        letterSpacing: "0.04em",
-        opacity: sel ? 0.7 : 0.55,
-        color: sel ? "#1A1305" : fds ? C.amber : C.muted
-      }
-    }, iniciais[ds]), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 14,
-        fontWeight: 700,
-        fontVariantNumeric: "tabular-nums"
-      }
-    }, dia), ocupado && /*#__PURE__*/React.createElement("span", {
-      style: {
-        position: "absolute",
-        bottom: 3,
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: 4,
-        height: 4,
-        borderRadius: 2,
-        background: sel ? "#1A1305" : C.green
-      }
-    }));
-  })))), /*#__PURE__*/React.createElement("div", {
-    style: {
       fontSize: 11,
-      color: C.muted,
-      marginTop: 10
+      color: C.dim,
+      textTransform: "uppercase",
+      letterSpacing: "0.08em"
     }
-  }, /*#__PURE__*/React.createElement("span", {
+  }, rotulo), /*#__PURE__*/React.createElement("div", {
     style: {
-      color: C.green
+      fontFamily: "'JetBrains Mono', monospace",
+      fontSize: 20,
+      fontWeight: 700,
+      color: cor || C.ink,
+      marginTop: 3
     }
-  }, "\u25CF"), " j\xE1 tem turno \xB7 contorno vermelho = feriado"));
+  }, valor), sub && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: C.dim
+    }
+  }, sub));
 }
-function MiniStat({
-  rotulo,
+function Barra({
   valor,
   cor
 }) {
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      background: C.card,
-      border: `1px solid ${C.border}`,
-      borderRadius: 12,
-      padding: "10px 12px",
-      textAlign: "center"
+      height: 7,
+      borderRadius: 4,
+      background: C.panel2,
+      overflow: "hidden"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: "'Barlow Condensed', sans-serif",
-      fontSize: 20,
-      fontWeight: 700,
-      color: cor || C.text,
-      fontVariantNumeric: "tabular-nums",
-      whiteSpace: "nowrap"
-    }
-  }, valor), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: C.muted,
-      textTransform: "uppercase",
-      letterSpacing: "0.08em"
-    }
-  }, rotulo));
-}
-function BarraDiaNoite({
-  diaMin,
-  noiteMin
-}) {
-  const total = diaMin + noiteMin;
-  if (total <= 0) return null;
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      height: 6,
-      borderRadius: 3,
-      overflow: "hidden",
-      background: C.card2
-    },
-    "aria-hidden": "true"
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: `${diaMin / total * 100}%`,
-      background: C.amber
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: `${noiteMin / total * 100}%`,
-      background: C.indigo
+      width: `${Math.max(0, Math.min(100, valor))}%`,
+      height: "100%",
+      background: cor
     }
   }));
 }
-function PreVisualizacao({
-  data,
-  entrada,
-  saida,
-  cfg,
-  isFeriado
+function Campo({
+  label,
+  children
 }) {
-  if (!entrada || !saida) return null;
-  const t = calcularTurno({
-    data: data || hojeISO(),
-    entrada,
-    saida
-  }, cfg, isFeriado);
-  const noturnas = t.noiteMin + t.noiteFerMin;
-  const diurnas = t.diaMin + t.diaFerMin;
-  return /*#__PURE__*/React.createElement("div", {
+  return /*#__PURE__*/React.createElement("label", {
     style: {
-      background: C.card2,
-      border: `1px solid ${C.border}`,
-      borderRadius: 11,
-      padding: "10px 12px"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      fontSize: 13,
-      color: C.muted,
-      marginBottom: 8
-    }
-  }, /*#__PURE__*/React.createElement("span", null, fmtHoras(t.totalMin), " \xB7", " ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.amber
-    }
-  }, fmtHoras(diurnas), " dia"), " \xB7", " ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.indigo
-    }
-  }, fmtHoras(noturnas), " noite"), t.ferMin > 0 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.red
-    }
-  }, " \xB7 ", fmtHoras(t.ferMin), " feriado")), /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.text,
-      fontWeight: 600
-    }
-  }, eur(t.valor))), /*#__PURE__*/React.createElement(BarraDiaNoite, {
-    diaMin: diurnas,
-    noiteMin: noturnas
-  }));
-}
-function CartaoTurno({
-  e,
-  cfg,
-  isFeriado,
-  aConfirmar,
-  onPedirApagar,
-  onCancelar,
-  onApagar
-}) {
-  const t = calcularTurno(e, cfg, isFeriado);
-  const valor = t.valor;
-  const diurnas = t.diaMin + t.diaFerMin;
-  const noturnas = t.noiteMin + t.noiteFerMin;
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: C.card,
-      border: `1px solid ${C.border}`,
-      borderRadius: 13,
-      padding: "12px 14px"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "flex-start"
-    }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontWeight: 700,
-      fontSize: 15
-    }
-  }, fmtData(e.data)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 13,
-      color: C.muted,
-      marginTop: 2
-    }
-  }, e.entrada, " \u2192 ", e.saida, e.local ? ` · ${e.local}` : "", e.vale !== false ? " · 🍽" : "")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      textAlign: "right"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: "'Barlow Condensed', sans-serif",
-      fontWeight: 700,
-      fontSize: 19,
-      fontVariantNumeric: "tabular-nums"
-    }
-  }, eur(valor)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: C.muted
-    }
-  }, fmtHoras(t.totalMin)))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 10
-    }
-  }, /*#__PURE__*/React.createElement(BarraDiaNoite, {
-    diaMin: diurnas,
-    noiteMin: noturnas
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginTop: 8
+      display: "block"
     }
   }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      color: C.muted
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.amber
-    }
-  }, fmtHoras(diurnas), " dia"), " · ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.indigo
-    }
-  }, fmtHoras(noturnas), " noite"), t.ferMin > 0 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.red
-    }
-  }, " \xB7 ", fmtHoras(t.ferMin), " feriado")), aConfirmar ? /*#__PURE__*/React.createElement("span", {
-    style: {
-      display: "flex",
-      gap: 8
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: onApagar,
-    style: {
-      ...btnTexto,
-      color: C.red
-    }
-  }, "Apagar"), /*#__PURE__*/React.createElement("button", {
-    onClick: onCancelar,
-    style: btnTexto
-  }, "Cancelar")) : /*#__PURE__*/React.createElement("button", {
-    onClick: onPedirApagar,
-    style: {
-      ...btnTexto,
-      color: C.muted
-    }
-  }, "Remover")));
-}
-const btnTexto = {
-  background: "none",
-  border: "none",
-  color: C.text,
-  fontSize: 13,
-  fontWeight: 600,
-  fontFamily: "inherit",
-  cursor: "pointer",
-  padding: "4px 6px"
-};
-function ResumoPeriodo({
-  resumo,
-  cfg,
-  titulo
-}) {
-  return /*#__PURE__*/React.createElement("section", {
-    style: {
-      background: C.card,
-      border: `1px solid ${C.border}`,
-      borderRadius: 14,
-      padding: 18
-    }
-  }, /*#__PURE__*/React.createElement("h2", {
-    style: {
-      ...tituloSeccao,
-      marginBottom: 2
-    }
-  }, "Resumo do per\xEDodo"), /*#__PURE__*/React.createElement("p", {
-    style: {
-      margin: "0 0 14px",
-      fontSize: 13,
-      color: C.muted
-    }
-  }, titulo), /*#__PURE__*/React.createElement("div", {
-    style: {
-      borderTop: `1px solid ${C.border}`
-    }
-  }, /*#__PURE__*/React.createElement(Linha, {
-    nome: `Horas diurnas (${fmtHoras(resumo.diaMin)} × ${eur(cfg.valorHora)})`,
-    valor: eur(resumo.brutoDia)
-  }), /*#__PURE__*/React.createElement(Linha, {
-    nome: `Horas noturnas (${fmtHoras(resumo.noiteMin)} × ${eur(resumo.valorNoturno)})`,
-    valor: eur(resumo.brutoNoite),
-    cor: C.indigo
-  }), resumo.ferMin > 0 && /*#__PURE__*/React.createElement(Linha, {
-    nome: `Horas em feriado (${fmtHoras(resumo.ferMin)} × ${(1 + (cfg.acrescimoFeriado || 0) / 100).toLocaleString("pt-PT")}×)`,
-    valor: eur(resumo.brutoFeriado),
-    cor: C.amber
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      borderTop: `1px dashed ${C.border}`
-    }
-  }), /*#__PURE__*/React.createElement(Linha, {
-    nome: "Bruto das horas",
-    valor: eur(resumo.brutoHoras)
-  }), /*#__PURE__*/React.createElement(Linha, {
-    nome: `Subsídio de alimentação (${resumo.vales} dias ≥ ${cfg.minHorasVale}h × ${eur(cfg.valeRefeicao)})`,
-    valor: eur(resumo.subAlim)
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      borderTop: `1px dashed ${C.border}`
-    }
-  }), /*#__PURE__*/React.createElement(Linha, {
-    nome: `Segurança Social (${cfg.taxaSS}%)`,
-    valor: eur(resumo.ss),
-    cor: C.red,
-    sinal: "-"
-  }), /*#__PURE__*/React.createElement(Linha, {
-    nome: `Retenção IRS (${cfg.taxaIRS}%)`,
-    valor: eur(resumo.irs),
-    cor: C.red,
-    sinal: "-"
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      borderTop: `1px solid ${C.border}`,
-      marginTop: 4
-    }
-  }), /*#__PURE__*/React.createElement(Linha, {
-    nome: "L\xEDquido estimado",
-    valor: eur(resumo.liquido),
-    cor: C.green,
-    forte: true
-  })), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontSize: 12,
-      color: C.muted,
-      lineHeight: 1.5,
-      marginTop: 12
-    }
-  }, "Estimativa indicativa. A reten\xE7\xE3o de IRS real depende das tabelas em vigor e da tua situa\xE7\xE3o pessoal (estado civil, dependentes) \u2014 ajusta a percentagem nas Defini\xE7\xF5es conforme o teu recibo. Os descontos aplicam-se ao bruto das horas; o subs\xEDdio de alimenta\xE7\xE3o \xE9 tratado como isento at\xE9 ao limite legal."));
-}
-function Definicoes({
-  cfg,
-  setCfg,
-  num,
-  feriadosExtra,
-  setFeriadosExtra
-}) {
-  const [novoFeriado, setNovoFeriado] = useState("");
-  const campo = (chave, label, passo = 0.01) => /*#__PURE__*/React.createElement(Campo, {
-    label: label
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "number",
-    step: passo,
-    inputMode: "decimal",
-    value: cfg[chave],
-    onChange: e => setCfg(c => ({
-      ...c,
-      [chave]: e.target.value
-    })),
-    onBlur: e => setCfg(c => ({
-      ...c,
-      [chave]: num(e.target.value)
-    })),
-    style: inputStyle
-  }));
-  return /*#__PURE__*/React.createElement("section", {
-    style: {
-      background: C.card,
-      border: `1px solid ${C.border}`,
-      borderRadius: 14,
-      padding: 18,
-      display: "grid",
-      gap: 14
-    }
-  }, /*#__PURE__*/React.createElement("h2", {
-    style: {
-      ...tituloSeccao,
-      marginBottom: 0
-    }
-  }, "Defini\xE7\xF5es"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr",
-      gap: 12
-    }
-  }, campo("valorHora", "Valor à hora (€)"), campo("majoracaoNoturna", "Majoração noturna (%)", 1), campo("noiteInicio", "Início da noite (h)", 1), campo("noiteFim", "Fim da noite (h)", 1), campo("valeRefeicao", "Vale-refeição (€)"), campo("minHorasVale", "Mín. horas p/ vale (h)", 0.5), campo("taxaSS", "Segurança Social (%)"), campo("taxaIRS", "Retenção IRS (%)"), campo("cicloInicio", "Ciclo: dia de início", 1), campo("cicloFim", "Ciclo: dia de fim (mês seg.)", 1)), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontSize: 12,
-      color: C.muted,
-      lineHeight: 1.5,
-      margin: 0
-    }
-  }, "O ciclo vai do dia de in\xEDcio at\xE9 ao dia de fim do m\xEAs seguinte (ex.: 22 mai \u2192 23 jun). Os dados ficam guardados automaticamente neste dispositivo de cada vez que registas ou alteras algo."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      borderTop: `1px solid ${C.border}`,
-      paddingTop: 14
-    }
-  }, /*#__PURE__*/React.createElement("h2", {
-    style: {
-      ...tituloSeccao,
-      marginBottom: 4
-    }
-  }, "Feriados"), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontSize: 12,
-      color: C.muted,
-      lineHeight: 1.5,
-      margin: "0 0 12px"
-    }
-  }, "Os feriados nacionais do pa\xEDs escolhido (incluindo P\xE1scoa, Corpo de Deus, etc.) s\xE3o calculados automaticamente. As horas trabalhadas em feriado pagam com o acr\xE9scimo abaixo; o vale-refei\xE7\xE3o fica igual."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr",
-      gap: 12
-    }
-  }, /*#__PURE__*/React.createElement(Campo, {
-    label: "Pa\xEDs"
-  }, /*#__PURE__*/React.createElement("select", {
-    value: cfg.pais,
-    onChange: e => setCfg(c => ({
-      ...c,
-      pais: e.target.value
-    })),
-    style: inputStyle
-  }, Object.entries(PAISES_FERIADOS).map(([codigo, p]) => /*#__PURE__*/React.createElement("option", {
-    key: codigo,
-    value: codigo
-  }, p.nome)), /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "Sem feriados autom\xE1ticos"))), /*#__PURE__*/React.createElement(Campo, {
-    label: "Acr\xE9scimo em feriado (%)"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "number",
-    step: 5,
-    inputMode: "decimal",
-    value: cfg.acrescimoFeriado,
-    onChange: e => setCfg(c => ({
-      ...c,
-      acrescimoFeriado: e.target.value
-    })),
-    onBlur: e => setCfg(c => ({
-      ...c,
-      acrescimoFeriado: num(e.target.value)
-    })),
-    style: inputStyle
-  }))), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontSize: 11.5,
-      color: C.muted,
-      margin: "6px 0 12px"
-    }
-  }, "100% = horas a dobrar (2\xD7)."), /*#__PURE__*/React.createElement("span", {
     style: {
       display: "block",
       fontSize: 11,
-      letterSpacing: "0.08em",
+      letterSpacing: "0.07em",
       textTransform: "uppercase",
-      color: C.muted,
-      marginBottom: 6,
+      color: C.dim,
+      marginBottom: 5,
       fontWeight: 600
     }
-  }, "Feriados locais (ex.: municipal)"), feriadosExtra.length > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gap: 6,
-      marginBottom: 10
-    }
-  }, [...feriadosExtra].sort().map(iso => /*#__PURE__*/React.createElement("div", {
-    key: iso,
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      background: C.card2,
-      border: `1px solid ${C.border}`,
-      borderRadius: 10,
-      padding: "8px 12px"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 14,
-      fontWeight: 600
-    }
-  }, fmtData(iso), " ", iso.slice(0, 4)), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setFeriadosExtra(prev => prev.filter(x => x !== iso)),
-    style: {
-      ...btnTexto,
-      color: C.red
-    }
-  }, "Remover")))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "1fr auto",
-      gap: 8
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "date",
-    value: novoFeriado,
-    onChange: e => setNovoFeriado(e.target.value),
-    style: inputStyle,
-    "aria-label": "Data do feriado local"
-  }), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      if (novoFeriado && !feriadosExtra.includes(novoFeriado)) {
-        setFeriadosExtra(prev => [...prev, novoFeriado]);
-        setNovoFeriado("");
-      }
-    },
-    style: {
-      ...btnPrimario,
-      padding: "10px 16px"
-    }
-  }, "Adicionar"))));
+  }, label), children);
 }
-
-/* ---------------- folha mensal: linha de cada dia ---------------- */
-
-const inputCompacto = {
-  ...inputStyle,
-  padding: "9px 8px",
-  fontSize: 14,
-  borderRadius: 9
-};
-function DiaLinha({
-  data,
-  items,
-  cfg,
-  feriadoNome,
-  isFeriado,
-  onCriar,
-  onAtualizar,
-  onApagar,
-  onAlternarVale
+function Modal({
+  titulo,
+  children,
+  onFechar
 }) {
-  const [dEnt, setDEnt] = useState("");
-  const [dSai, setDSai] = useState("");
-  const [dLocal, setDLocal] = useState("");
-  const [maisBloco, setMaisBloco] = useState(false);
-  const [y, m, d] = data.split("-").map(Number);
-  const diaSemana = new Date(y, m - 1, d).getDay();
-  const fimDeSemana = diaSemana === 0 || diaSemana === 6;
-  const temTrabalho = items.length > 0;
-  let totalMin = 0,
-    valor = 0,
-    noiteMin = 0,
-    ferMin = 0;
-  for (const e of items) {
-    const t = calcularTurno(e, cfg, isFeriado);
-    totalMin += t.totalMin;
-    noiteMin += t.noiteMin + t.noiteFerMin;
-    ferMin += t.ferMin;
-    valor += t.valor;
-  }
-  const comVale = items.some(e => e.vale !== false);
-  const qualificaVale = totalMin >= (cfg.minHorasVale || 0) * 60;
-  function tentarCriar(ent, sai) {
-    if (ent && sai) {
-      onCriar(data, ent, sai, dLocal);
-      setDEnt("");
-      setDSai("");
-      setMaisBloco(false);
-    }
-  }
-  const mostrarRascunho = !temTrabalho || maisBloco;
   return /*#__PURE__*/React.createElement("div", {
+    onClick: onFechar,
     style: {
-      background: temTrabalho ? C.card : "transparent",
-      border: `1px solid ${temTrabalho ? C.border : "rgba(38,46,72,0.5)"}`,
-      borderLeft: temTrabalho ? `3px solid ${ferMin > 0 ? C.red : noiteMin > 0 ? C.indigo : C.amber}` : `3px solid transparent`,
-      borderRadius: 12,
-      padding: "10px 12px"
+      position: "fixed",
+      inset: 0,
+      background: "rgba(4,7,13,0.82)",
+      zIndex: 50,
+      display: "flex",
+      alignItems: "flex-end",
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: e => e.stopPropagation(),
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: "18px 18px 0 0",
+      padding: 18,
+      width: "100%",
+      maxWidth: 600,
+      display: "grid",
+      gap: 12,
+      paddingBottom: "calc(18px + env(safe-area-inset-bottom))"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: temTrabalho || mostrarRascunho ? 8 : 0
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: 700,
-      fontSize: 14.5,
-      color: temTrabalho ? C.text : fimDeSemana ? "#A9B2C9" : C.muted
-    }
-  }, fmtData(data), fimDeSemana && /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.amber,
-      fontSize: 11,
-      marginLeft: 6
-    }
-  }, "\u25CF"), feriadoNome && /*#__PURE__*/React.createElement("span", {
-    style: {
-      display: "inline-block",
-      marginLeft: 8,
-      fontSize: 10.5,
-      fontWeight: 700,
-      letterSpacing: "0.06em",
-      textTransform: "uppercase",
-      color: C.red,
-      background: "rgba(242,115,140,0.12)",
-      border: `1px solid ${C.red}55`,
-      borderRadius: 6,
-      padding: "1px 6px",
-      verticalAlign: "middle"
-    },
-    title: feriadoNome
-  }, feriadoNome)), /*#__PURE__*/React.createElement("span", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 10
-    }
-  }, temTrabalho ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
-    onClick: () => onAlternarVale(data),
-    title: !qualificaVale ? `Sem vale: menos de ${cfg.minHorasVale}h no dia` : "Vale-refeição",
-    style: {
-      background: "none",
-      border: "none",
-      cursor: "pointer",
-      fontSize: 15,
-      opacity: comVale && qualificaVale ? 1 : 0.3,
-      filter: comVale && !qualificaVale ? "grayscale(1)" : "none",
-      padding: 0
-    }
-  }, "\uD83C\uDF7D"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: "'Barlow Condensed', sans-serif",
-      fontWeight: 700,
-      fontSize: 17,
-      fontVariantNumeric: "tabular-nums"
-    }
-  }, fmtHoras(totalMin), /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.green,
-      marginLeft: 8
-    }
-  }, eur(valor)))) : /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12.5,
-      color: C.muted
-    }
-  }, "Folga"))), items.map(e => {
-    const t = calcularTurno(e, cfg, isFeriado);
-    const atravessa = toMin(e.saida) <= toMin(e.entrada);
-    const noturnas = t.noiteMin + t.noiteFerMin;
-    return /*#__PURE__*/React.createElement("div", {
-      key: e.id,
-      style: {
-        marginBottom: 8
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr 1.4fr auto",
-        gap: 6,
-        alignItems: "center"
-      }
-    }, /*#__PURE__*/React.createElement("input", {
-      type: "time",
-      value: e.entrada,
-      onChange: ev => onAtualizar(e.id, {
-        entrada: ev.target.value
-      }),
-      style: inputCompacto,
-      "aria-label": "Entrada"
-    }), /*#__PURE__*/React.createElement("input", {
-      type: "time",
-      value: e.saida,
-      onChange: ev => onAtualizar(e.id, {
-        saida: ev.target.value
-      }),
-      style: inputCompacto,
-      "aria-label": "Sa\xEDda"
-    }), /*#__PURE__*/React.createElement("input", {
-      type: "text",
-      value: e.local || "",
-      onChange: ev => onAtualizar(e.id, {
-        local: ev.target.value
-      }),
-      placeholder: "Local",
-      list: "locais-folha",
-      style: inputCompacto,
-      "aria-label": "Local"
-    }), /*#__PURE__*/React.createElement("button", {
-      onClick: () => onApagar(e.id),
-      "aria-label": "Remover bloco",
-      style: {
-        background: "none",
-        border: "none",
-        color: C.muted,
-        fontSize: 18,
-        cursor: "pointer",
-        padding: "0 4px"
-      }
-    }, "\xD7")), (noturnas > 0 || t.ferMin > 0 || atravessa) && /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11.5,
-        color: C.muted,
-        marginTop: 3
-      }
-    }, atravessa && /*#__PURE__*/React.createElement("span", null, "sai no dia seguinte \xB7 "), noturnas > 0 && /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: C.indigo
-      }
-    }, fmtHoras(noturnas), " noturnas"), t.ferMin > 0 && /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: C.red
-      }
-    }, noturnas > 0 ? " · " : "", fmtHoras(t.ferMin), " em feriado (", (1 + (cfg.acrescimoFeriado || 0) / 100).toLocaleString("pt-PT"), "\xD7)")));
-  }), mostrarRascunho && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr 1.4fr auto",
-      gap: 6,
       alignItems: "center"
     }
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "time",
-    value: dEnt,
-    onChange: ev => {
-      setDEnt(ev.target.value);
-      tentarCriar(ev.target.value, dSai);
-    },
-    style: inputCompacto,
-    "aria-label": "Entrada"
-  }), /*#__PURE__*/React.createElement("input", {
-    type: "time",
-    value: dSai,
-    onChange: ev => {
-      setDSai(ev.target.value);
-      tentarCriar(dEnt, ev.target.value);
-    },
-    style: inputCompacto,
-    "aria-label": "Sa\xEDda"
-  }), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    value: dLocal,
-    onChange: ev => setDLocal(ev.target.value),
-    placeholder: "Local",
-    list: "locais-folha",
-    style: inputCompacto,
-    "aria-label": "Local"
-  }), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("h2", {
     style: {
-      width: 26
+      margin: 0,
+      fontSize: 18,
+      fontWeight: 700
     }
-  })), temTrabalho && !maisBloco && /*#__PURE__*/React.createElement("button", {
-    onClick: () => setMaisBloco(true),
+  }, titulo), /*#__PURE__*/React.createElement("button", {
+    onClick: onFechar,
     style: {
       ...btnTexto,
-      color: C.amber,
-      padding: "4px 0 0"
+      color: C.dim,
+      fontSize: 20
     }
-  }, "+ bloco neste dia"));
+  }, "×")), children));
 }
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(PersonTurnos));
-</script>
-</body>
-</html>
+
+/* ---------- estilos partilhados ---------- */
+const inp = {
+  width: "100%",
+  background: C.panel2,
+  border: `1px solid ${C.line}`,
+  borderRadius: 10,
+  color: C.ink,
+  padding: "10px 12px",
+  fontSize: 15,
+  fontFamily: "inherit",
+  outline: "none"
+};
+const btnPrimario = {
+  background: C.cyan,
+  color: "#04201F",
+  border: "none",
+  borderRadius: 11,
+  padding: "12px 16px",
+  fontSize: 15,
+  fontWeight: 700,
+  fontFamily: "inherit",
+  cursor: "pointer"
+};
+const btnMini = {
+  background: C.panel2,
+  border: `1px solid ${C.line}`,
+  color: C.ink,
+  borderRadius: 8,
+  padding: "5px 10px",
+  fontSize: 12.5,
+  fontWeight: 600,
+  fontFamily: "inherit",
+  cursor: "pointer"
+};
+const btnTexto = {
+  background: "none",
+  border: "none",
+  color: C.ink,
+  fontSize: 14,
+  fontWeight: 600,
+  fontFamily: "inherit",
+  cursor: "pointer",
+  padding: "4px 8px"
+};
+const tituloSeccao = {
+  fontSize: 13,
+  fontWeight: 700,
+  letterSpacing: "0.07em",
+  textTransform: "uppercase",
+  color: C.dim,
+  margin: "0 0 12px"
+};
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(PersonTrades));</script>
+</body></html>
