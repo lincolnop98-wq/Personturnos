@@ -453,6 +453,13 @@ const usd = v => new Intl.NumberFormat("en-US", {
   currency: "USD",
   maximumFractionDigits: 2
 }).format(v || 0);
+
+// formata em USD ou EUR conforme a moeda escolhida na conta pessoal
+const fmtMoeda = (v, moeda) => new Intl.NumberFormat(moeda === "EUR" ? "pt-PT" : "en-US", {
+  style: "currency",
+  currency: moeda === "EUR" ? "EUR" : "USD",
+  maximumFractionDigits: 2
+}).format(v || 0);
 const pct = v => `${v >= 0 ? "+" : ""}${(v || 0).toLocaleString("pt-PT", {
   minimumFractionDigits: 1,
   maximumFractionDigits: 2
@@ -532,13 +539,38 @@ function PersonTrades() {
   }).format((v || 0) * taxaEur)}`;
 
   /* ---- operações sobre o estado ---- */
-  function addConta(nome, tipo) {
-    setContas(prev => [...prev, {
+  function addConta(nome, tipo, saldo, moeda) {
+    const novaConta = {
       id: uid(),
       nome,
       tipo,
       mesas: []
-    }]);
+    };
+    if (tipo === "pessoal") {
+      // conta pessoal: cria uma mesa única e invisível (registo direto)
+      novaConta.moeda = moeda || "USD";
+      novaConta.mesas = [{
+        id: uid(),
+        etiqueta: nome,
+        saldoInicial: saldo || 0,
+        faseAtual: 1,
+        pessoal: true,
+        moeda: moeda || "USD",
+        dias: {},
+        diasPorFase: {},
+        fasesAprovadas: [],
+        saques: [],
+        regras: {
+          fases: 0,
+          targetPct: [0, 0, 0],
+          perdaDiaPct: 0,
+          perdaTotalPct: 0,
+          trailing: false,
+          minDias: 0
+        }
+      }];
+    }
+    setContas(prev => [...prev, novaConta]);
   }
   function removeConta(id) {
     setContas(prev => prev.filter(c => c.id !== id));
@@ -738,89 +770,165 @@ function SeccaoContas({
       display: "grid",
       gap: 12
     }
-  }, contas.map(c => /*#__PURE__*/React.createElement("div", {
-    key: c.id,
-    style: {
-      background: C.panel,
-      border: `1px solid ${C.line}`,
-      borderRadius: 14,
-      overflow: "hidden"
+  }, contas.map(c => {
+    const ehPessoal = c.tipo === "pessoal";
+    const mesaP = ehPessoal ? c.mesas[0] : null;
+    const rP = mesaP ? pnlMesa(mesaP) : null;
+
+    // conta pessoal: cartão único clicável que abre direto o registo
+    if (ehPessoal && mesaP) {
+      return /*#__PURE__*/React.createElement("div", {
+        key: c.id,
+        style: {
+          background: C.panel,
+          border: `1px solid ${C.line}`,
+          borderRadius: 14,
+          overflow: "hidden"
+        }
+      }, /*#__PURE__*/React.createElement("button", {
+        onClick: () => onAbrirMesa(c.id, mesaP.id),
+        style: {
+          width: "100%",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          background: "transparent",
+          border: "none",
+          padding: "14px",
+          cursor: "pointer",
+          color: C.ink,
+          fontFamily: "inherit",
+          textAlign: "left"
+        }
+      }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontWeight: 700,
+          fontSize: 16
+        }
+      }, c.nome), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 12,
+          color: C.dim,
+          marginTop: 2
+        }
+      }, fmtMoeda(mesaP.saldoInicial, mesaP.moeda), " · conta pessoal")), /*#__PURE__*/React.createElement("div", {
+        style: {
+          textAlign: "right"
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontFamily: "'JetBrains Mono', monospace",
+          fontWeight: 700,
+          fontSize: 16,
+          color: rP.pnl > 0 ? C.up : rP.pnl < 0 ? C.down : C.ink
+        }
+      }, pct(rP.pnlPct)), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 12,
+          color: C.dim
+        }
+      }, fmtMoeda(rP.pnl, mesaP.moeda)))), /*#__PURE__*/React.createElement("div", {
+        style: {
+          borderTop: `1px solid ${C.line}`,
+          textAlign: "right"
+        }
+      }, /*#__PURE__*/React.createElement("button", {
+        onClick: () => onRemoveConta(c.id),
+        style: {
+          ...btnMini,
+          color: C.down,
+          border: "none",
+          background: "transparent",
+          margin: "4px 8px"
+        }
+      }, "remover conta")));
     }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      padding: "12px 14px",
-      borderBottom: c.mesas.length ? `1px solid ${C.line}` : "none"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: 700,
-      fontSize: 16
-    }
-  }, c.nome), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 6
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => onPedirMesa(c.id),
-    style: btnMini
-  }, "+ mesa"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => onRemoveConta(c.id),
-    style: {
-      ...btnMini,
-      color: C.down
-    }
-  }, "×"))), c.mesas.map(m => {
-    const r = pnlMesa(m);
-    return /*#__PURE__*/React.createElement("button", {
-      key: m.id,
-      onClick: () => onAbrirMesa(c.id, m.id),
+
+    // prop firm: cabeçalho + mesas (como antes)
+    return /*#__PURE__*/React.createElement("div", {
+      key: c.id,
       style: {
-        width: "100%",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        background: "transparent",
-        border: "none",
-        borderTop: `1px solid ${C.line}`,
-        padding: "12px 14px",
-        cursor: "pointer",
-        color: C.ink,
-        fontFamily: "inherit",
-        textAlign: "left"
-      }
-    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontWeight: 600,
-        fontSize: 15
-      }
-    }, m.etiqueta), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 12,
-        color: C.dim,
-        marginTop: 2
-      }
-    }, usd(m.saldoInicial), " · ", faseRotulo(m))), /*#__PURE__*/React.createElement("div", {
-      style: {
-        textAlign: "right"
+        background: C.panel,
+        border: `1px solid ${C.line}`,
+        borderRadius: 14,
+        overflow: "hidden"
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        fontFamily: "'JetBrains Mono', monospace",
-        fontWeight: 700,
-        fontSize: 16,
-        color: r.pnl > 0 ? C.up : r.pnl < 0 ? C.down : C.ink
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "12px 14px",
+        borderBottom: c.mesas.length ? `1px solid ${C.line}` : "none"
       }
-    }, pct(r.pnlPct)), /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("span", {
       style: {
-        fontSize: 12,
-        color: C.dim
+        fontWeight: 700,
+        fontSize: 16
       }
-    }, usd(r.pnl))));
-  })))));
+    }, c.nome), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 6
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: () => onPedirMesa(c.id),
+      style: btnMini
+    }, "+ mesa"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => onRemoveConta(c.id),
+      style: {
+        ...btnMini,
+        color: C.down
+      }
+    }, "×"))), c.mesas.map(m => {
+      const r = pnlMesa(m);
+      return /*#__PURE__*/React.createElement("button", {
+        key: m.id,
+        onClick: () => onAbrirMesa(c.id, m.id),
+        style: {
+          width: "100%",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          background: "transparent",
+          border: "none",
+          borderTop: `1px solid ${C.line}`,
+          padding: "12px 14px",
+          cursor: "pointer",
+          color: C.ink,
+          fontFamily: "inherit",
+          textAlign: "left"
+        }
+      }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontWeight: 600,
+          fontSize: 15
+        }
+      }, m.etiqueta), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 12,
+          color: C.dim,
+          marginTop: 2
+        }
+      }, usd(m.saldoInicial), " · ", faseRotulo(m))), /*#__PURE__*/React.createElement("div", {
+        style: {
+          textAlign: "right"
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontFamily: "'JetBrains Mono', monospace",
+          fontWeight: 700,
+          fontSize: 16,
+          color: r.pnl > 0 ? C.up : r.pnl < 0 ? C.down : C.ink
+        }
+      }, pct(r.pnlPct)), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 12,
+          color: C.dim
+        }
+      }, usd(r.pnl))));
+    }));
+  })));
 }
 
 /* ============================================================
@@ -835,8 +943,19 @@ function EcraMesa({
   onUpdate,
   onRemover
 }) {
-  const [aba, setAba] = useState("painel"); // painel | registar | saques | regras
+  const ehPessoal = !!mesa.pessoal;
+  const [aba, setAba] = useState(ehPessoal ? "registar" : "painel");
   const r = useMemo(() => pnlMesa(mesa), [mesa]);
+
+  // formatador de moeda da mesa: conta pessoal usa a sua moeda; prop firm usa $
+  const fmt = ehPessoal ? v => fmtMoeda(v, mesa.moeda) : usd;
+  // equivalente na outra moeda (subtil)
+  const eurConv = ehPessoal ? v => mesa.moeda === "EUR" ? `≈ ${usd(v)}` // se a conta é em €, mostra o ≈$ por baixo
+  : eur(v) // se é em $, mostra ≈€
+  : eur;
+
+  // abas visíveis conforme o tipo
+  const abas = ehPessoal ? [["registar", "Registar"], ["saques", "Saques"], ["conta", "Conta"]] : [["painel", "Painel"], ["registar", "Registar"], ["saques", "Saques"], ["regras", "Regras"]];
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: C.panel,
@@ -868,35 +987,40 @@ function EcraMesa({
       fontSize: 13,
       color: C.dim
     }
-  }, usd(mesa.saldoInicial))), /*#__PURE__*/React.createElement("div", {
+  }, fmt(mesa.saldoInicial))), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
       color: C.dim,
       marginTop: 2
     }
-  }, faseRotulo(mesa))), /*#__PURE__*/React.createElement("div", {
+  }, ehPessoal ? "Conta pessoal" : faseRotulo(mesa))), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: 16,
       maxWidth: 600,
       margin: "0 auto"
     }
-  }, aba === "painel" && /*#__PURE__*/React.createElement(PainelMesa, {
+  }, aba === "painel" && !ehPessoal && /*#__PURE__*/React.createElement(PainelMesa, {
     mesa: mesa,
     r: r,
     usd: usd,
     eur: eur
   }), aba === "registar" && /*#__PURE__*/React.createElement(RegistarDias, {
     mesa: mesa,
-    usd: usd,
+    usd: fmt,
     onUpdate: onUpdate
   }), aba === "saques" && /*#__PURE__*/React.createElement(Saques, {
     mesa: mesa,
-    usd: usd,
-    eur: eur,
+    usd: fmt,
+    eur: eurConv,
     onUpdate: onUpdate
-  }), aba === "regras" && /*#__PURE__*/React.createElement(RegrasMesa, {
+  }), aba === "regras" && !ehPessoal && /*#__PURE__*/React.createElement(RegrasMesa, {
     mesa: mesa,
     usd: usd,
+    onUpdate: onUpdate,
+    onRemover: onRemover
+  }), aba === "conta" && ehPessoal && /*#__PURE__*/React.createElement(ContaPessoalDef, {
+    mesa: mesa,
+    fmt: fmt,
     onUpdate: onUpdate,
     onRemover: onRemover
   })), /*#__PURE__*/React.createElement("nav", {
@@ -908,13 +1032,13 @@ function EcraMesa({
       background: C.panel,
       borderTop: `1px solid ${C.line}`,
       display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr 1fr",
+      gridTemplateColumns: `repeat(${abas.length}, 1fr)`,
       padding: "8px 8px calc(8px + env(safe-area-inset-bottom))",
       gap: 4,
       maxWidth: 600,
       margin: "0 auto"
     }
-  }, [["painel", "Painel"], ["registar", "Registar"], ["saques", "Saques"], ["regras", "Regras"]].map(([id, nome]) => /*#__PURE__*/React.createElement("button", {
+  }, abas.map(([id, nome]) => /*#__PURE__*/React.createElement("button", {
     key: id,
     onClick: () => setAba(id),
     style: {
@@ -933,6 +1057,78 @@ function EcraMesa({
       height: 64
     }
   }));
+}
+
+/* ---------- Definições da conta pessoal (saldo, moeda, eliminar) ---------- */
+function ContaPessoalDef({
+  mesa,
+  fmt,
+  onUpdate,
+  onRemover
+}) {
+  const num = v => isNaN(parseFloat(v)) ? 0 : parseFloat(v);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement("section", {
+    style: {
+      background: C.panel,
+      border: `1px solid ${C.line}`,
+      borderRadius: 14,
+      padding: 16,
+      display: "grid",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: tituloSeccao
+  }, "Definições da conta"), /*#__PURE__*/React.createElement(Campo, {
+    label: "Nome / etiqueta"
+  }, /*#__PURE__*/React.createElement("input", {
+    value: mesa.etiqueta,
+    onChange: e => onUpdate({
+      etiqueta: e.target.value
+    }),
+    style: inp
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "2fr 1fr",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement(Campo, {
+    label: "Saldo inicial"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: mesa.saldoInicial,
+    onChange: e => onUpdate({
+      saldoInicial: e.target.value
+    }),
+    onBlur: e => onUpdate({
+      saldoInicial: num(e.target.value)
+    }),
+    style: inp
+  })), /*#__PURE__*/React.createElement(Campo, {
+    label: "Moeda"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: mesa.moeda,
+    onChange: e => onUpdate({
+      moeda: e.target.value
+    }),
+    style: inp
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "USD"
+  }, "$ USD"), /*#__PURE__*/React.createElement("option", {
+    value: "EUR"
+  }, "€ EUR"))))), /*#__PURE__*/React.createElement("button", {
+    onClick: onRemover,
+    style: {
+      ...btnTexto,
+      color: C.down,
+      justifySelf: "center"
+    }
+  }, "Eliminar esta conta"));
 }
 
 /* ---------- Painel: métricas-chave + gestão de risco ---------- */
@@ -1228,7 +1424,7 @@ function RegistarDias({
       textTransform: "uppercase",
       letterSpacing: "0.08em"
     }
-  }, faseRotulo(mesa), " · resultado"), alvoPct > 0 && /*#__PURE__*/React.createElement("span", {
+  }, mesa.pessoal ? "Resultado acumulado" : `${faseRotulo(mesa)} · resultado`), alvoPct > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 12,
       color: C.dim
@@ -1973,6 +2169,9 @@ function ModalNovaConta({
 }) {
   const [nome, setNome] = useState("");
   const [tipo, setTipo] = useState("prop");
+  const [saldo, setSaldo] = useState("");
+  const [moeda, setMoeda] = useState("USD");
+  const podeGravar = nome.trim() && (tipo === "prop" || parseFloat((saldo || "").replace(",", ".")) > 0);
   return /*#__PURE__*/React.createElement(Modal, {
     onFechar: onFechar,
     titulo: "Nova conta"
@@ -2002,14 +2201,50 @@ function ModalNovaConta({
   }, /*#__PURE__*/React.createElement("input", {
     value: nome,
     onChange: e => setNome(e.target.value),
-    placeholder: tipo === "prop" ? "Ex.: Hantec, FTMO…" : "Ex.: Conta cent pessoal",
+    placeholder: tipo === "prop" ? "Ex.: Hantec, FTMO…" : "Ex.: Conta cent, Real FortMarkets…",
     style: inp
-  })), /*#__PURE__*/React.createElement("button", {
-    onClick: () => nome.trim() && onCriar(nome.trim(), tipo),
-    disabled: !nome.trim(),
+  })), tipo === "pessoal" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "2fr 1fr",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement(Campo, {
+    label: "Saldo inicial"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    inputMode: "decimal",
+    value: saldo,
+    onChange: e => setSaldo(e.target.value),
+    placeholder: "Ex.: 500",
+    style: inp
+  })), /*#__PURE__*/React.createElement(Campo, {
+    label: "Moeda"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: moeda,
+    onChange: e => setMoeda(e.target.value),
+    style: inp
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "USD"
+  }, "$ USD"), /*#__PURE__*/React.createElement("option", {
+    value: "EUR"
+  }, "€ EUR")))), tipo === "pessoal" && /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 12,
+      color: C.dim,
+      margin: "0 0 4px",
+      lineHeight: 1.5
+    }
+  }, "Serve para conta cent ou normal — mete só o saldo real da conta. Sem etapas nem regras de prop firm; registas os trades direto."), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      if (!podeGravar) return;
+      const s = parseFloat((saldo || "").replace(",", ".")) || 0;
+      onCriar(nome.trim(), tipo, s, moeda);
+    },
+    disabled: !podeGravar,
     style: {
       ...btnPrimario,
-      opacity: nome.trim() ? 1 : 0.5
+      opacity: podeGravar ? 1 : 0.5
     }
   }, "Criar conta"));
 }
