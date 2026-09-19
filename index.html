@@ -326,8 +326,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 </script>
-<script>
-const {
+<script>const {
   useState,
   useEffect,
   useMemo
@@ -437,6 +436,35 @@ const C = {
   green: "#5BD89A",
   red: "#F2738C"
 };
+
+/* cores que o utilizador pode dar a cada turno/local (bolinha do calendário) */
+const CORES_LOCAL = [{
+  nome: "Verde",
+  cor: "#5BD89A"
+}, {
+  nome: "Azul",
+  cor: "#5B9DEF"
+}, {
+  nome: "Vermelho",
+  cor: "#F2738C"
+}, {
+  nome: "Âmbar",
+  cor: "#FFB454"
+}, {
+  nome: "Roxo",
+  cor: "#A78BFA"
+}, {
+  nome: "Ciano",
+  cor: "#45C7C0"
+}, {
+  nome: "Rosa",
+  cor: "#F472B6"
+}, {
+  nome: "Laranja",
+  cor: "#FB923C"
+}];
+const COR_PADRAO = "#5BD89A"; // verde (compatível com turnos antigos sem cor)
+
 const eur = v => new Intl.NumberFormat("pt-PT", {
   style: "currency",
   currency: "EUR"
@@ -842,6 +870,7 @@ function PersonTurnos() {
   const [fEntrada, setFEntrada] = useState("20:00");
   const [fSaida, setFSaida] = useState("08:00");
   const [fLocal, setFLocal] = useState("");
+  const [fCor, setFCor] = useState(COR_PADRAO); // cor da bolinha deste turno
   const [fVale, setFVale] = useState(true);
 
   /* carregar */
@@ -980,6 +1009,21 @@ function PersonTurnos() {
     const s = new Set(entradas.map(e => e.local).filter(Boolean));
     return [...s].sort();
   }, [entradas]);
+
+  /* cor associada a cada local (a última usada) — para a legenda e memória */
+  const coresPorLocal = useMemo(() => {
+    const m = {};
+    for (const e of entradas) {
+      if (e.local && e.cor) m[e.local] = e.cor;
+    }
+    return m;
+  }, [entradas]);
+
+  /* ao escolher um local já usado, recupera a cor que lhe deste antes */
+  useEffect(() => {
+    const nome = fLocal.trim();
+    if (nome && coresPorLocal[nome]) setFCor(coresPorLocal[nome]);
+  }, [fLocal, coresPorLocal]);
   const [flash, setFlash] = useState("");
 
   /* Cria o mesmo turno (hora + local) em todos os dias selecionados */
@@ -991,6 +1035,7 @@ function PersonTurnos() {
       entrada: fEntrada,
       saida: fSaida,
       local: fLocal.trim(),
+      cor: fCor,
       vale: fVale
     }));
     setEntradas(prev => [...prev, ...novas]);
@@ -1089,7 +1134,7 @@ function PersonTurnos() {
       letterSpacing: "0.1em",
       textTransform: "uppercase"
     }
-  }, "Folha de servi\xE7o \xB7 Seguran\xE7a privada"))), /*#__PURE__*/React.createElement("div", {
+  }, "Folha de serviço · Segurança privada"))), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 16,
       display: "flex",
@@ -1102,9 +1147,9 @@ function PersonTurnos() {
     }
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => setOffset(o => o - 1),
-    "aria-label": "Per\xEDodo anterior",
+    "aria-label": "Período anterior",
     style: btnSeta
-  }, "\u2039"), /*#__PURE__*/React.createElement("div", {
+  }, "‹"), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center"
     }
@@ -1125,11 +1170,11 @@ function PersonTurnos() {
       cursor: "pointer",
       padding: 0
     }
-  }, "voltar ao per\xEDodo atual")), /*#__PURE__*/React.createElement("button", {
+  }, "voltar ao período atual")), /*#__PURE__*/React.createElement("button", {
     onClick: () => setOffset(o => o + 1),
-    "aria-label": "Per\xEDodo seguinte",
+    "aria-label": "Período seguinte",
     style: btnSeta
-  }, "\u203A"))), /*#__PURE__*/React.createElement("main", {
+  }, "›"))), /*#__PURE__*/React.createElement("main", {
     style: {
       padding: 18,
       maxWidth: 560,
@@ -1141,7 +1186,7 @@ function PersonTurnos() {
       textAlign: "center",
       marginTop: 40
     }
-  }, "A carregar os teus registos\u2026") : aba === "folha" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, "A carregar os teus registos…") : aba === "folha" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr 1fr",
@@ -1155,7 +1200,7 @@ function PersonTurnos() {
     rotulo: "Dias",
     valor: resumo.dias
   }), /*#__PURE__*/React.createElement(MiniStat, {
-    rotulo: "L\xEDquido est.",
+    rotulo: "Líquido est.",
     valor: eur(resumo.liquido),
     cor: C.green
   })), /*#__PURE__*/React.createElement("p", {
@@ -1165,7 +1210,7 @@ function PersonTurnos() {
       lineHeight: 1.5,
       margin: "0 0 12px"
     }
-  }, "Preenche entrada e sa\xEDda em cada dia. Se a sa\xEDda for antes da entrada (ex.: 20:00 \u2192 06:00), conta como sa\xEDda no dia seguinte. Dias em branco ficam como folga."), /*#__PURE__*/React.createElement("button", {
+  }, "Preenche entrada e saída em cada dia. Se a saída for antes da entrada (ex.: 20:00 → 06:00), conta como saída no dia seguinte. Dias em branco ficam como folga."), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       try {
         const url = gerarImagemFolha({
@@ -1191,7 +1236,7 @@ function PersonTurnos() {
       justifyContent: "center",
       gap: 8
     }
-  }, "\uD83D\uDCBE Guardar imagem (escala + recibo)"), /*#__PURE__*/React.createElement("datalist", {
+  }, "💾 Guardar imagem (escala + recibo)"), /*#__PURE__*/React.createElement("datalist", {
     id: "locais-folha"
   }, locais.map(l => /*#__PURE__*/React.createElement("option", {
     key: l,
@@ -1226,7 +1271,7 @@ function PersonTurnos() {
     rotulo: "Dias",
     valor: resumo.dias
   }), /*#__PURE__*/React.createElement(MiniStat, {
-    rotulo: "L\xEDquido est.",
+    rotulo: "Líquido est.",
     valor: eur(resumo.liquido),
     cor: C.green
   })), /*#__PURE__*/React.createElement("section", {
@@ -1254,11 +1299,12 @@ function PersonTurnos() {
       marginBottom: 6,
       fontWeight: 600
     }
-  }, "Dias (toca para selecionar v\xE1rios)"), /*#__PURE__*/React.createElement(SeletorDias, {
+  }, "Dias (toca para selecionar vários)"), /*#__PURE__*/React.createElement(SeletorDias, {
     dias: diasDoPeriodo,
     selecionados: fDatas,
     porData: porData,
     mapaFeriados: mapaFeriados,
+    coresPorLocal: coresPorLocal,
     onToggle: d => setFDatas(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d])
   }), fDatas.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1293,7 +1339,7 @@ function PersonTurnos() {
     onChange: e => setFEntrada(e.target.value),
     style: inputStyle
   })), /*#__PURE__*/React.createElement(Campo, {
-    label: "Sa\xEDda"
+    label: "Saída"
   }, /*#__PURE__*/React.createElement("input", {
     type: "time",
     value: fSaida,
@@ -1305,7 +1351,7 @@ function PersonTurnos() {
     type: "text",
     value: fLocal,
     onChange: e => setFLocal(e.target.value),
-    placeholder: "Ex.: Centro Comercial, Obra Norte\u2026",
+    placeholder: "Ex.: Centro Comercial, Obra Norte…",
     list: "locais",
     style: inputStyle
   }), /*#__PURE__*/React.createElement("datalist", {
@@ -1313,7 +1359,35 @@ function PersonTurnos() {
   }, locais.map(l => /*#__PURE__*/React.createElement("option", {
     key: l,
     value: l
-  })))), /*#__PURE__*/React.createElement(PreVisualizacao, {
+  })))), /*#__PURE__*/React.createElement(Campo, {
+    label: "Cor no calendário"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 9
+    }
+  }, CORES_LOCAL.map(c => {
+    const sel = fCor === c.cor;
+    return /*#__PURE__*/React.createElement("button", {
+      key: c.cor,
+      type: "button",
+      onClick: () => setFCor(c.cor),
+      title: c.nome,
+      "aria-label": c.nome,
+      "aria-pressed": sel,
+      style: {
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        background: c.cor,
+        border: sel ? `2.5px solid ${C.text}` : `2px solid ${C.border}`,
+        boxShadow: sel ? `0 0 0 2px ${c.cor}66` : "none",
+        cursor: "pointer",
+        padding: 0
+      }
+    });
+  }))), /*#__PURE__*/React.createElement(PreVisualizacao, {
     data: fDatas.length > 0 ? [...fDatas].sort()[0] : hojeISO(),
     entrada: fEntrada,
     saida: fSaida,
@@ -1337,7 +1411,7 @@ function PersonTurnos() {
       width: 17,
       height: 17
     }
-  }), "Vale-refei\xE7\xE3o nestes dias (", eur(cfg.valeRefeicao), ")"), /*#__PURE__*/React.createElement("button", {
+  }), "Vale-refeição nestes dias (", eur(cfg.valeRefeicao), ")"), /*#__PURE__*/React.createElement("button", {
     onClick: adicionarTurno,
     disabled: fDatas.length === 0,
     style: {
@@ -1356,7 +1430,7 @@ function PersonTurnos() {
       ...tituloSeccao,
       marginBottom: 10
     }
-  }, "Turnos do per\xEDodo", " ", /*#__PURE__*/React.createElement("span", {
+  }, "Turnos do período", " ", /*#__PURE__*/React.createElement("span", {
     style: {
       color: C.muted,
       fontWeight: 400
@@ -1368,7 +1442,7 @@ function PersonTurnos() {
       textAlign: "center",
       padding: "24px 0"
     }
-  }, "Ainda n\xE3o h\xE1 turnos neste per\xEDodo. Regista o primeiro acima.") : /*#__PURE__*/React.createElement("div", {
+  }, "Ainda não há turnos neste período. Regista o primeiro acima.") : /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gap: 10
@@ -1425,7 +1499,7 @@ function PersonTurnos() {
     }
   }, /*#__PURE__*/React.createElement("img", {
     src: imgExport,
-    alt: "Folha de servi\xE7o e recibo do per\xEDodo",
+    alt: "Folha de serviço e recibo do período",
     style: {
       width: "100%",
       display: "block"
@@ -1437,7 +1511,7 @@ function PersonTurnos() {
       color: C.muted,
       textAlign: "center"
     }
-  }, "Mant\xE9m o dedo na imagem para a guardar na galeria, ou usa os bot\xF5es abaixo."), /*#__PURE__*/React.createElement("div", {
+  }, "Mantém o dedo na imagem para a guardar na galeria, ou usa os botões abaixo."), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr 1fr",
@@ -1583,8 +1657,16 @@ function SeletorDias({
   selecionados,
   porData,
   mapaFeriados,
+  coresPorLocal,
   onToggle
 }) {
+  // cabeçalho: semana começa à segunda (estilo PT)
+  const CABEC = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+  // coluna 0..6 (segunda=0 … domingo=6)
+  const coluna = iso => {
+    const [y, m, d] = iso.split("-").map(Number);
+    return (new Date(y, m - 1, d).getDay() + 6) % 7;
+  };
   // agrupar por mês mantendo a ordem
   const grupos = [];
   for (const iso of dias) {
@@ -1599,6 +1681,20 @@ function SeletorDias({
     }
     grupos[grupos.length - 1].dias.push(iso);
   }
+
+  // cores distintas dos turnos de um dia (até 3 bolinhas)
+  const coresDoDia = iso => {
+    const arr = porData[iso] || [];
+    const vistas = [];
+    for (const e of arr) {
+      const c = e.cor || COR_PADRAO;
+      if (!vistas.includes(c)) vistas.push(c);
+    }
+    return vistas.slice(0, 3);
+  };
+
+  // legenda cor → local (a partir dos turnos já registados)
+  const legenda = Object.entries(coresPorLocal);
   return /*#__PURE__*/React.createElement("div", {
     style: {
       background: C.card2,
@@ -1606,70 +1702,126 @@ function SeletorDias({
       borderRadius: 11,
       padding: "10px 10px 12px"
     }
-  }, grupos.map(g => /*#__PURE__*/React.createElement("div", {
-    key: g.chave
   }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10.5,
-      fontWeight: 700,
-      letterSpacing: "0.1em",
-      color: C.muted,
-      margin: "6px 2px 6px"
-    }
-  }, g.rotulo), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "repeat(7, 1fr)",
-      gap: 6
+      gap: 6,
+      marginBottom: 6
     }
-  }, g.dias.map(iso => {
-    const dia = Number(iso.slice(8, 10));
-    const sel = selecionados.includes(iso);
-    const ocupado = (porData[iso] || []).length > 0;
-    const feriado = mapaFeriados.has(iso);
-    const [yy, mm, dd] = iso.split("-").map(Number);
-    const ds = new Date(yy, mm - 1, dd).getDay();
-    const fds = ds === 0 || ds === 6;
-    return /*#__PURE__*/React.createElement("button", {
-      key: iso,
-      onClick: () => onToggle(iso),
-      "aria-pressed": sel,
+  }, CABEC.map((d, i) => /*#__PURE__*/React.createElement("div", {
+    key: d,
+    style: {
+      textAlign: "center",
+      fontSize: 10.5,
+      fontWeight: 700,
+      letterSpacing: "0.02em",
+      color: i >= 5 ? C.amber : C.muted
+    }
+  }, d))), grupos.map(g => {
+    const vazias = coluna(g.dias[0]); // células em branco antes do 1.º dia
+    return /*#__PURE__*/React.createElement("div", {
+      key: g.chave
+    }, /*#__PURE__*/React.createElement("div", {
       style: {
-        position: "relative",
-        background: sel ? C.amber : "transparent",
-        border: `1.5px solid ${sel ? C.amber : feriado ? `${C.red}77` : C.border}`,
-        color: sel ? "#1A1305" : fds ? "#C7CEE0" : C.text,
-        borderRadius: 9,
-        padding: "9px 0",
-        fontSize: 14,
+        fontSize: 10.5,
         fontWeight: 700,
-        fontFamily: "inherit",
-        fontVariantNumeric: "tabular-nums",
-        cursor: "pointer"
+        letterSpacing: "0.1em",
+        color: C.muted,
+        margin: "6px 2px 6px"
       }
-    }, dia, ocupado && /*#__PURE__*/React.createElement("span", {
+    }, g.rotulo), /*#__PURE__*/React.createElement("div", {
       style: {
-        position: "absolute",
-        bottom: 3,
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: 4,
-        height: 4,
-        borderRadius: 2,
-        background: sel ? "#1A1305" : C.green
+        display: "grid",
+        gridTemplateColumns: "repeat(7, 1fr)",
+        gap: 6
       }
-    }));
-  })))), /*#__PURE__*/React.createElement("div", {
+    }, Array.from({
+      length: vazias
+    }).map((_, i) => /*#__PURE__*/React.createElement("div", {
+      key: `v${i}`
+    })), g.dias.map(iso => {
+      const dia = Number(iso.slice(8, 10));
+      const sel = selecionados.includes(iso);
+      const feriado = mapaFeriados.has(iso);
+      const col = coluna(iso);
+      const fds = col >= 5; // sáb/dom
+      const cores = coresDoDia(iso);
+      return /*#__PURE__*/React.createElement("button", {
+        key: iso,
+        onClick: () => onToggle(iso),
+        "aria-pressed": sel,
+        style: {
+          position: "relative",
+          background: sel ? C.amber : "transparent",
+          border: `1.5px solid ${sel ? C.amber : feriado ? `${C.red}77` : C.border}`,
+          color: sel ? "#1A1305" : fds ? "#C7CEE0" : C.text,
+          borderRadius: 9,
+          padding: "8px 0 11px",
+          fontFamily: "inherit",
+          cursor: "pointer",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center"
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 14,
+          fontWeight: 700,
+          fontVariantNumeric: "tabular-nums"
+        }
+      }, dia), cores.length > 0 && /*#__PURE__*/React.createElement("span", {
+        style: {
+          position: "absolute",
+          bottom: 4,
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: 2
+        }
+      }, cores.map((c, i) => /*#__PURE__*/React.createElement("span", {
+        key: i,
+        style: {
+          width: 5,
+          height: 5,
+          borderRadius: 3,
+          background: c,
+          boxShadow: sel ? "0 0 0 1px #1A1305" : "none"
+        }
+      }))));
+    })));
+  }), legenda.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "6px 14px",
+      marginTop: 12,
+      paddingTop: 10,
+      borderTop: `1px solid ${C.border}`
+    }
+  }, legenda.map(([local, cor]) => /*#__PURE__*/React.createElement("span", {
+    key: local,
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      fontSize: 12,
+      color: C.text
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 9,
+      height: 9,
+      borderRadius: 5,
+      background: cor
+    }
+  }), local))), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: C.muted,
       marginTop: 10
     }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.green
-    }
-  }, "\u25CF"), " j\xE1 tem turno \xB7 contorno vermelho = feriado"));
+  }, "bolinha colorida = turno registado (cor do local) · contorno vermelho = feriado"));
 }
 function MiniStat({
   rotulo,
@@ -1759,11 +1911,11 @@ function PreVisualizacao({
       color: C.muted,
       marginBottom: 8
     }
-  }, /*#__PURE__*/React.createElement("span", null, fmtHoras(t.totalMin), " \xB7", " ", /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", null, fmtHoras(t.totalMin), " ·", " ", /*#__PURE__*/React.createElement("span", {
     style: {
       color: C.amber
     }
-  }, fmtHoras(diurnas), " dia"), " \xB7", " ", /*#__PURE__*/React.createElement("span", {
+  }, fmtHoras(diurnas), " dia"), " ·", " ", /*#__PURE__*/React.createElement("span", {
     style: {
       color: C.indigo
     }
@@ -1771,7 +1923,7 @@ function PreVisualizacao({
     style: {
       color: C.red
     }
-  }, " \xB7 ", fmtHoras(t.ferMin), " feriado")), /*#__PURE__*/React.createElement("span", {
+  }, " · ", fmtHoras(t.ferMin), " feriado")), /*#__PURE__*/React.createElement("span", {
     style: {
       color: C.text,
       fontWeight: 600
@@ -1816,9 +1968,27 @@ function CartaoTurno({
     style: {
       fontSize: 13,
       color: C.muted,
-      marginTop: 2
+      marginTop: 2,
+      display: "flex",
+      alignItems: "center",
+      flexWrap: "wrap"
     }
-  }, e.entrada, " \u2192 ", e.saida, e.local ? ` · ${e.local}` : "", e.vale !== false ? " · 🍽" : "")), /*#__PURE__*/React.createElement("div", {
+  }, e.entrada, " → ", e.saida, e.local ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 5,
+      marginLeft: 5
+    }
+  }, "· ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      background: e.cor || COR_PADRAO,
+      display: "inline-block"
+    }
+  }), e.local) : "", e.vale !== false ? " · 🍽" : "")), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "right"
     }
@@ -1865,7 +2035,7 @@ function CartaoTurno({
     style: {
       color: C.red
     }
-  }, " \xB7 ", fmtHoras(t.ferMin), " feriado")), aConfirmar ? /*#__PURE__*/React.createElement("span", {
+  }, " · ", fmtHoras(t.ferMin), " feriado")), aConfirmar ? /*#__PURE__*/React.createElement("span", {
     style: {
       display: "flex",
       gap: 8
@@ -1914,7 +2084,7 @@ function ResumoPeriodo({
       ...tituloSeccao,
       marginBottom: 2
     }
-  }, "Resumo do per\xEDodo"), /*#__PURE__*/React.createElement("p", {
+  }, "Resumo do período"), /*#__PURE__*/React.createElement("p", {
     style: {
       margin: "0 0 14px",
       fontSize: 13,
@@ -1965,7 +2135,7 @@ function ResumoPeriodo({
       marginTop: 4
     }
   }), /*#__PURE__*/React.createElement(Linha, {
-    nome: "L\xEDquido estimado",
+    nome: "Líquido estimado",
     valor: eur(resumo.liquido),
     cor: C.green,
     forte: true
@@ -1976,7 +2146,7 @@ function ResumoPeriodo({
       lineHeight: 1.5,
       marginTop: 12
     }
-  }, "Estimativa indicativa. A reten\xE7\xE3o de IRS real depende das tabelas em vigor e da tua situa\xE7\xE3o pessoal (estado civil, dependentes) \u2014 ajusta a percentagem nas Defini\xE7\xF5es conforme o teu recibo. Os descontos aplicam-se ao bruto das horas; o subs\xEDdio de alimenta\xE7\xE3o \xE9 tratado como isento at\xE9 ao limite legal."));
+  }, "Estimativa indicativa. A retenção de IRS real depende das tabelas em vigor e da tua situação pessoal (estado civil, dependentes) — ajusta a percentagem nas Definições conforme o teu recibo. Os descontos aplicam-se ao bruto das horas; o subsídio de alimentação é tratado como isento até ao limite legal."));
 }
 function Definicoes({
   cfg,
@@ -2017,7 +2187,7 @@ function Definicoes({
       ...tituloSeccao,
       marginBottom: 0
     }
-  }, "Defini\xE7\xF5es"), /*#__PURE__*/React.createElement("div", {
+  }, "Definições"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
@@ -2030,7 +2200,7 @@ function Definicoes({
       lineHeight: 1.5,
       margin: 0
     }
-  }, "O ciclo vai do dia de in\xEDcio at\xE9 ao dia de fim do m\xEAs seguinte (ex.: 22 mai \u2192 23 jun). Os dados ficam guardados automaticamente neste dispositivo de cada vez que registas ou alteras algo."), /*#__PURE__*/React.createElement("div", {
+  }, "O ciclo vai do dia de início até ao dia de fim do mês seguinte (ex.: 22 mai → 23 jun). Os dados ficam guardados automaticamente neste dispositivo de cada vez que registas ou alteras algo."), /*#__PURE__*/React.createElement("div", {
     style: {
       borderTop: `1px solid ${C.border}`,
       paddingTop: 14
@@ -2047,14 +2217,14 @@ function Definicoes({
       lineHeight: 1.5,
       margin: "0 0 12px"
     }
-  }, "Os feriados nacionais do pa\xEDs escolhido (incluindo P\xE1scoa, Corpo de Deus, etc.) s\xE3o calculados automaticamente. As horas trabalhadas em feriado pagam com o acr\xE9scimo abaixo; o vale-refei\xE7\xE3o fica igual."), /*#__PURE__*/React.createElement("div", {
+  }, "Os feriados nacionais do país escolhido (incluindo Páscoa, Corpo de Deus, etc.) são calculados automaticamente. As horas trabalhadas em feriado pagam com o acréscimo abaixo; o vale-refeição fica igual."), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
       gap: 12
     }
   }, /*#__PURE__*/React.createElement(Campo, {
-    label: "Pa\xEDs"
+    label: "País"
   }, /*#__PURE__*/React.createElement("select", {
     value: cfg.pais,
     onChange: e => setCfg(c => ({
@@ -2067,8 +2237,8 @@ function Definicoes({
     value: codigo
   }, p.nome)), /*#__PURE__*/React.createElement("option", {
     value: ""
-  }, "Sem feriados autom\xE1ticos"))), /*#__PURE__*/React.createElement(Campo, {
-    label: "Acr\xE9scimo em feriado (%)"
+  }, "Sem feriados automáticos"))), /*#__PURE__*/React.createElement(Campo, {
+    label: "Acréscimo em feriado (%)"
   }, /*#__PURE__*/React.createElement("input", {
     type: "number",
     step: 5,
@@ -2089,7 +2259,7 @@ function Definicoes({
       color: C.muted,
       margin: "6px 0 12px"
     }
-  }, "100% = horas a dobrar (2\xD7)."), /*#__PURE__*/React.createElement("span", {
+  }, "100% = horas a dobrar (2×)."), /*#__PURE__*/React.createElement("span", {
     style: {
       display: "block",
       fontSize: 11,
@@ -2229,7 +2399,7 @@ function DiaLinha({
       fontSize: 11,
       marginLeft: 6
     }
-  }, "\u25CF"), feriadoNome && /*#__PURE__*/React.createElement("span", {
+  }, "●"), feriadoNome && /*#__PURE__*/React.createElement("span", {
     style: {
       display: "inline-block",
       marginLeft: 8,
@@ -2263,7 +2433,7 @@ function DiaLinha({
       filter: comVale && !qualificaVale ? "grayscale(1)" : "none",
       padding: 0
     }
-  }, "\uD83C\uDF7D"), /*#__PURE__*/React.createElement("span", {
+  }, "🍽"), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: "'Barlow Condensed', sans-serif",
       fontWeight: 700,
@@ -2311,7 +2481,7 @@ function DiaLinha({
         saida: ev.target.value
       }),
       style: inputCompacto,
-      "aria-label": "Sa\xEDda"
+      "aria-label": "Saída"
     }), /*#__PURE__*/React.createElement("input", {
       type: "text",
       value: e.local || "",
@@ -2333,13 +2503,13 @@ function DiaLinha({
         cursor: "pointer",
         padding: "0 4px"
       }
-    }, "\xD7")), (noturnas > 0 || t.ferMin > 0 || atravessa) && /*#__PURE__*/React.createElement("div", {
+    }, "×")), (noturnas > 0 || t.ferMin > 0 || atravessa) && /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11.5,
         color: C.muted,
         marginTop: 3
       }
-    }, atravessa && /*#__PURE__*/React.createElement("span", null, "sai no dia seguinte \xB7 "), noturnas > 0 && /*#__PURE__*/React.createElement("span", {
+    }, atravessa && /*#__PURE__*/React.createElement("span", null, "sai no dia seguinte · "), noturnas > 0 && /*#__PURE__*/React.createElement("span", {
       style: {
         color: C.indigo
       }
@@ -2347,7 +2517,7 @@ function DiaLinha({
       style: {
         color: C.red
       }
-    }, noturnas > 0 ? " · " : "", fmtHoras(t.ferMin), " em feriado (", (1 + (cfg.acrescimoFeriado || 0) / 100).toLocaleString("pt-PT"), "\xD7)")));
+    }, noturnas > 0 ? " · " : "", fmtHoras(t.ferMin), " em feriado (", (1 + (cfg.acrescimoFeriado || 0) / 100).toLocaleString("pt-PT"), "×)")));
   }), mostrarRascunho && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
@@ -2372,7 +2542,7 @@ function DiaLinha({
       tentarCriar(dEnt, ev.target.value);
     },
     style: inputCompacto,
-    "aria-label": "Sa\xEDda"
+    "aria-label": "Saída"
   }), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: dLocal,
@@ -2394,7 +2564,6 @@ function DiaLinha({
     }
   }, "+ bloco neste dia"));
 }
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(PersonTurnos));
-</script>
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(PersonTurnos));</script>
 </body>
 </html>

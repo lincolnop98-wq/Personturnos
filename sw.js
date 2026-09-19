@@ -1,4 +1,4 @@
-const CACHE = 'personturnos-v1';
+const CACHE = 'personturnos-v2';
 const FICHEIROS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FICHEIROS)).then(() => self.skipWaiting()));
