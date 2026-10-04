@@ -2419,11 +2419,25 @@ function AbaPrevisao({
       borderTop: `1px solid ${C.border}`
     }
   }, /*#__PURE__*/React.createElement(Linha, {
-    nome: "Salário (conta)",
-    valor: eur(estSalario)
+    nome: `Hora extra (${horasExtraAnterior.toFixed(0)}h · ciclo ${cicloAnteriorRef})`,
+    valor: eur(brutoExtraAnterior),
+    cor: C.amber
   }), /*#__PURE__*/React.createElement(Linha, {
-    nome: "Vale-refeição (cartão)",
-    valor: eur(estCartao)
+    nome: `Salário base (${horasNormalAtual.toFixed(0)}h até ${limiar}h deste ciclo)`,
+    valor: eur(brutoNormalAtual)
+  }), /*#__PURE__*/React.createElement(Linha, {
+    nome: `Vale-refeição (${rAtual.vales} dias × ${eur(cfg.valeRefeicao)})`,
+    valor: eur(estCartao),
+    cor: C.indigo
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderTop: `1px dashed ${C.border}`
+    }
+  }), /*#__PURE__*/React.createElement(Linha, {
+    nome: `Segurança Social + IRS (${cfg.taxaSS + cfg.taxaIRS}%)`,
+    valor: eur(ss + irs),
+    cor: C.red,
+    sinal: "-"
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       borderTop: `1px dashed ${C.border}`
@@ -2433,14 +2447,14 @@ function AbaPrevisao({
     valor: eur(estSalario + estCartao),
     cor: C.green,
     forte: true
-  })), /*#__PURE__*/React.createElement("p", {
+  })), rAtual.diasFerias > 0 && /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 11.5,
       color: C.muted,
-      marginTop: 10,
+      marginTop: 8,
       lineHeight: 1.5
     }
-  }, "Vale-refeição: dias trabalhados neste ciclo (", cicloRef, ") — ", rAtual.dias, "d.", " ", "Horas normais: até ", limiar, "h deste mesmo ciclo — fizeste ", horasNormalAtual.toFixed(0), "h", rAtual.diasFerias > 0 ? ` (inclui ${rAtual.diasFerias} ${rAtual.diasFerias === 1 ? "dia" : "dias"} de férias)` : "", ".", " ", "Horas extra: acima de ", limiar, "h no ciclo anterior (", cicloAnteriorRef, ") — fizeste ", rAnterior.horas.toFixed(0), "h,", " ", horasExtraAnterior > 0 ? `${horasExtraAnterior.toFixed(0)}h extra` : "sem extra", ".")), /*#__PURE__*/React.createElement("section", {
+  }, "O salário base já inclui ", rAtual.diasFerias, " ", rAtual.diasFerias === 1 ? "dia" : "dias", " de férias deste ciclo.")), /*#__PURE__*/React.createElement("section", {
     style: card
   }, existente && !editar ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
