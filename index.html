@@ -762,11 +762,12 @@ const isoLocal = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,
 /* calcula o período + resumo (horas, bruto, subsídio, descontos) de QUALQUER
    ciclo, não só do que está em ecrã — usado pela aba Previsão, que precisa de
    olhar para ciclos anteriores ao que o offset atual mostra */
-function periodoEResumo(entradas, cfg, feriadosExtra, offset) {
+function periodoEResumo(entradas, cfg, feriadosExtra, offset, ferias) {
   const periodo = calcularPeriodo(offset, cfg.cicloInicio, cfg.cicloFim);
   const a = isoLocal(periodo.inicio);
   const b = isoLocal(periodo.fim);
   const doPeriodo = entradas.filter(e => e.data >= a && e.data <= b);
+  const feriasDoPeriodo = (ferias || []).filter(f => f.data >= a && f.data <= b);
   const mapaFeriados = new Map();
   const pais = PAISES_FERIADOS[cfg.pais];
   const anos = new Set([periodo.inicio.getFullYear(), periodo.fim.getFullYear(), periodo.fim.getFullYear() + 1]);
@@ -802,6 +803,11 @@ function periodoEResumo(entradas, cfg, feriadosExtra, offset) {
     minutosPorDia.set(e.data, (minutosPorDia.get(e.data) || 0) + t.totalMin);
     if (e.vale !== false) diasValeAtivo.add(e.data);
   }
+  const minFeriasDia = 8 * 60;
+  const feriasMin = feriasDoPeriodo.length * minFeriasDia;
+  const brutoFerias = feriasMin / 60 * vH;
+  diaMin += feriasMin;
+  brutoNormalDia += brutoFerias;
   const limiteVale = (cfg.minHorasVale || 0) * 60;
   let vales = 0;
   for (const d of diasValeAtivo) {
@@ -818,6 +824,9 @@ function periodoEResumo(entradas, cfg, feriadosExtra, offset) {
     totalMin,
     horas: totalMin / 60,
     dias: diasTrabalhados.size,
+    diasFerias: feriasDoPeriodo.length,
+    feriasMin,
+    brutoFerias,
     vales,
     brutoDia: brutoNormalDia,
     brutoNoite: brutoNormalNoite,
@@ -907,6 +916,7 @@ function PersonTurnos() {
   const [confirmar, setConfirmar] = useState(null);
   const [imgExport, setImgExport] = useState(null);
   const [recebidos, setRecebidos] = useState([]); // {id, periodoInicio (iso), salario, cartao} — o que realmente caiu, por período
+  const [ferias, setFerias] = useState([]); // {id, data} — dias de férias: contam 8h diurnas para o salário, sem noturno/feriado/vale-refeição
 
   // formulário de novo turno
   const [fDatas, setFDatas] = useState([]); // dias selecionados (vários de uma vez)
@@ -930,6 +940,7 @@ function PersonTurnos() {
           });
           if (Array.isArray(d.feriadosExtra)) setFeriadosExtra(d.feriadosExtra);
           if (Array.isArray(d.recebidos)) setRecebidos(d.recebidos);
+          if (Array.isArray(d.ferias)) setFerias(d.ferias);
         }
       } catch (e) {
         /* sem dados guardados ainda */
@@ -948,19 +959,26 @@ function PersonTurnos() {
           entradas,
           cfg,
           feriadosExtra,
-          recebidos
+          recebidos,
+          ferias
         }));
       } catch (e) {
         console.error("Falha ao guardar", e);
       }
     })();
-  }, [entradas, cfg, feriadosExtra, recebidos, carregado]);
+  }, [entradas, cfg, feriadosExtra, recebidos, ferias, carregado]);
   const periodo = useMemo(() => calcularPeriodo(offset, cfg.cicloInicio, cfg.cicloFim), [offset, cfg.cicloInicio, cfg.cicloFim]);
   const doPeriodo = useMemo(() => {
     const a = isoLocal(periodo.inicio);
     const b = isoLocal(periodo.fim);
     return entradas.filter(e => e.data >= a && e.data <= b).sort((x, y) => x.data < y.data ? 1 : x.data > y.data ? -1 : 0);
   }, [entradas, periodo]);
+  const feriasDoPeriodo = useMemo(() => {
+    const a = isoLocal(periodo.inicio);
+    const b = isoLocal(periodo.fim);
+    return ferias.filter(f => f.data >= a && f.data <= b).sort((x, y) => x.data < y.data ? -1 : 1);
+  }, [ferias, periodo]);
+  const diasFeriasSet = useMemo(() => new Set(ferias.map(f => f.data)), [ferias]);
 
   /* todos os dias do ciclo, por ordem, para a Folha */
   const diasDoPeriodo = useMemo(() => {
@@ -1021,6 +1039,14 @@ function PersonTurnos() {
       minutosPorDia.set(e.data, (minutosPorDia.get(e.data) || 0) + t.totalMin);
       if (e.vale !== false) diasValeAtivo.add(e.data);
     }
+    // dias de férias: contam sempre como 8h diurnas (sem noturno/feriado) para o
+    // salário, mas nunca geram vale-refeição — guardadas à parte para a Resumo
+    // poder mostrar a linha de férias separada das horas diurnas normais
+    const minFeriasDia = 8 * 60;
+    const feriasMin = feriasDoPeriodo.length * minFeriasDia;
+    const brutoFerias = feriasMin / 60 * vH;
+    diaMin += feriasMin;
+    brutoNormalDia += brutoFerias;
     // vale-refeição: só em dias com pelo menos `minHorasVale` horas
     const limiteVale = (cfg.minHorasVale || 0) * 60;
     let vales = 0;
@@ -1038,6 +1064,9 @@ function PersonTurnos() {
       ferMin,
       totalMin: diaMin + noiteMin + ferMin,
       dias: diasTrabalhados.size,
+      diasFerias: feriasDoPeriodo.length,
+      feriasMin,
+      brutoFerias,
       vales,
       valorNoturno: vN,
       brutoDia: brutoNormalDia,
@@ -1049,7 +1078,7 @@ function PersonTurnos() {
       irs,
       liquido
     };
-  }, [doPeriodo, cfg, mapaFeriados]);
+  }, [doPeriodo, cfg, mapaFeriados, feriasDoPeriodo]);
   const locais = useMemo(() => {
     const s = new Set(entradas.map(e => e.local).filter(Boolean));
     return [...s].sort();
@@ -1113,6 +1142,23 @@ function PersonTurnos() {
   function apagar(id) {
     setEntradas(prev => prev.filter(e => e.id !== id));
     setConfirmar(null);
+  }
+
+  /* marca dias (ex.: fDatas) como férias — contam 8h diurnas para o salário,
+     sem noturno/feriado, e nunca geram vale-refeição */
+  function marcarFerias(datas) {
+    if (!datas || datas.length === 0) return;
+    setFerias(prev => {
+      const existentes = new Set(prev.map(f => f.data));
+      const novas = datas.filter(d => !existentes.has(d)).map(data => ({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        data
+      }));
+      return [...prev, ...novas];
+    });
+  }
+  function apagarFerias(id) {
+    setFerias(prev => prev.filter(f => f.id !== id));
   }
 
   /* recebido real de um período (chave = data ISO do início do período); guarda também o
@@ -1405,13 +1451,15 @@ function PersonTurnos() {
     porData: porData,
     mapaFeriados: mapaFeriados,
     resumoLocaisPeriodo: resumoLocaisPeriodo,
+    diasFeriasSet: diasFeriasSet,
     onToggle: d => setFDatas(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d])
   }), fDatas.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
-      marginTop: 8
+      marginTop: 8,
+      gap: 10
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
@@ -1419,13 +1467,29 @@ function PersonTurnos() {
       color: C.amber,
       fontWeight: 600
     }
-  }, fDatas.length, " ", fDatas.length === 1 ? "dia selecionado" : "dias selecionados"), /*#__PURE__*/React.createElement("button", {
+  }, fDatas.length, " ", fDatas.length === 1 ? "dia selecionado" : "dias selecionados"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "flex",
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      marcarFerias(fDatas);
+      setFlash(fDatas.length === 1 ? "✓ 1 dia marcado como férias" : `✓ ${fDatas.length} dias marcados como férias`);
+      setFDatas([]);
+      setTimeout(() => setFlash(""), 3000);
+    },
+    style: {
+      ...btnTexto,
+      color: C.green
+    }
+  }, "Marcar férias"), /*#__PURE__*/React.createElement("button", {
     onClick: () => setFDatas([]),
     style: {
       ...btnTexto,
       color: C.muted
     }
-  }, "Limpar"))), /*#__PURE__*/React.createElement("div", {
+  }, "Limpar")))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
@@ -1556,7 +1620,27 @@ function PersonTurnos() {
     onPedirApagar: () => setConfirmar(e.id),
     onCancelar: () => setConfirmar(null),
     onApagar: () => apagar(e.id)
-  })))) : aba === "resumo" ? /*#__PURE__*/React.createElement(ResumoPeriodo, {
+  }))), feriasDoPeriodo.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      ...tituloSeccao,
+      marginTop: 22,
+      marginBottom: 10
+    }
+  }, "Férias do período", " ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.muted,
+      fontWeight: 400
+    }
+  }, "(", feriasDoPeriodo.length, ")")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 10
+    }
+  }, feriasDoPeriodo.map(f => /*#__PURE__*/React.createElement(CartaoFerias, {
+    key: f.id,
+    f: f,
+    onApagar: () => apagarFerias(f.id)
+  }))))) : aba === "resumo" ? /*#__PURE__*/React.createElement(ResumoPeriodo, {
     resumo: resumo,
     cfg: cfg,
     titulo: tituloPeriodo
@@ -1569,6 +1653,7 @@ function PersonTurnos() {
     cicloRef: tituloPeriodo,
     periodoInicio: isoLocal(periodo.inicio),
     recebidos: recebidos,
+    ferias: ferias,
     onSalvar: salvarRecebido,
     onApagar: apagarRecebido
   }) : /*#__PURE__*/React.createElement(Definicoes, {
@@ -1769,6 +1854,7 @@ function SeletorDias({
   porData,
   mapaFeriados,
   resumoLocaisPeriodo,
+  diasFeriasSet,
   onToggle
 }) {
   // cabeçalho: semana começa à segunda (estilo PT)
@@ -1855,6 +1941,7 @@ function SeletorDias({
       const dia = Number(iso.slice(8, 10));
       const sel = selecionados.includes(iso);
       const feriado = mapaFeriados.has(iso);
+      const ferias = diasFeriasSet ? diasFeriasSet.has(iso) : false;
       const col = coluna(iso);
       const fds = col >= 5; // sáb/dom
       const cores = coresDoDia(iso);
@@ -1864,8 +1951,8 @@ function SeletorDias({
         "aria-pressed": sel,
         style: {
           position: "relative",
-          background: sel ? C.amber : "transparent",
-          border: `1.5px solid ${sel ? C.amber : feriado ? `${C.red}77` : C.border}`,
+          background: sel ? C.amber : ferias ? `${C.green}22` : "transparent",
+          border: `1.5px solid ${sel ? C.amber : ferias ? C.green : feriado ? `${C.red}77` : C.border}`,
           color: sel ? "#1A1305" : fds ? "#C7CEE0" : C.text,
           borderRadius: 9,
           padding: "8px 0 11px",
@@ -1875,7 +1962,16 @@ function SeletorDias({
           flexDirection: "column",
           alignItems: "center"
         }
-      }, /*#__PURE__*/React.createElement("span", {
+      }, ferias && /*#__PURE__*/React.createElement("span", {
+        style: {
+          position: "absolute",
+          top: 2,
+          right: 3,
+          fontSize: 8.5,
+          fontWeight: 800,
+          color: sel ? "#1A1305" : C.green
+        }
+      }, "F"), /*#__PURE__*/React.createElement("span", {
         style: {
           fontSize: 14,
           fontWeight: 700,
@@ -1941,7 +2037,7 @@ function SeletorDias({
       color: C.muted,
       marginTop: 10
     }
-  }, "bolinha colorida = turno registado (cor do local) · contorno vermelho = feriado"));
+  }, "bolinha colorida = turno registado (cor do local) · contorno vermelho = feriado · \"F\" verde = férias"));
 }
 function MiniStat({
   rotulo,
@@ -2177,6 +2273,40 @@ function CartaoTurno({
     }
   }, "Remover")));
 }
+function CartaoFerias({
+  f,
+  onApagar
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.card,
+      border: `1px solid ${C.green}55`,
+      borderRadius: 13,
+      padding: "12px 14px",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 15
+    }
+  }, fmtData(f.data)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: C.green,
+      marginTop: 2,
+      fontWeight: 600
+    }
+  }, "Férias · 8h diurnas")), /*#__PURE__*/React.createElement("button", {
+    onClick: onApagar,
+    style: {
+      ...btnTexto,
+      color: C.muted
+    }
+  }, "Remover"));
+}
 const btnTexto = {
   background: "none",
   border: "none",
@@ -2197,7 +2327,8 @@ function AbaPrevisao({
   periodoInicio,
   recebidos,
   onSalvar,
-  onApagar
+  onApagar,
+  ferias
 }) {
   const existente = recebidos.find(r => r.periodoInicio === periodoInicio);
   const [editar, setEditar] = useState(false);
@@ -2219,9 +2350,9 @@ function AbaPrevisao({
      - horas extra (acima do limiar, banco de horas): de 2 ciclos atrás
      porque é assim que esta empresa desfasa o pagamento */
   const limiar = cfg.horasContrato || 173.33;
-  const rAtual = useMemo(() => periodoEResumo(entradas, cfg, feriadosExtra, offset), [entradas, cfg, feriadosExtra, offset]);
-  const rAnterior = useMemo(() => periodoEResumo(entradas, cfg, feriadosExtra, offset - 1), [entradas, cfg, feriadosExtra, offset]);
-  const rDuasAntes = useMemo(() => periodoEResumo(entradas, cfg, feriadosExtra, offset - 2), [entradas, cfg, feriadosExtra, offset]);
+  const rAtual = useMemo(() => periodoEResumo(entradas, cfg, feriadosExtra, offset, ferias), [entradas, cfg, feriadosExtra, offset, ferias]);
+  const rAnterior = useMemo(() => periodoEResumo(entradas, cfg, feriadosExtra, offset - 1, ferias), [entradas, cfg, feriadosExtra, offset, ferias]);
+  const rDuasAntes = useMemo(() => periodoEResumo(entradas, cfg, feriadosExtra, offset - 2, ferias), [entradas, cfg, feriadosExtra, offset, ferias]);
   const fracaoNormal = rAnterior.horas > 0 ? Math.min(1, limiar / rAnterior.horas) : 0;
   const brutoNormal = rAnterior.brutoHoras * fracaoNormal;
   const fracaoExtra = rDuasAntes.horas > limiar && rDuasAntes.horas > 0 ? (rDuasAntes.horas - limiar) / rDuasAntes.horas : 0;
@@ -2506,8 +2637,12 @@ function ResumoPeriodo({
       borderTop: `1px solid ${C.border}`
     }
   }, /*#__PURE__*/React.createElement(Linha, {
-    nome: `Horas diurnas (${fmtHoras(resumo.diaMin)} × ${eur(cfg.valorHora)})`,
-    valor: eur(resumo.brutoDia)
+    nome: `Horas diurnas (${fmtHoras(resumo.diaMin - (resumo.feriasMin || 0))} × ${eur(cfg.valorHora)})`,
+    valor: eur(resumo.brutoDia - (resumo.brutoFerias || 0))
+  }), resumo.diasFerias > 0 && /*#__PURE__*/React.createElement(Linha, {
+    nome: `Férias (${resumo.diasFerias} ${resumo.diasFerias === 1 ? "dia" : "dias"} × 8h × ${eur(cfg.valorHora)})`,
+    valor: eur(resumo.brutoFerias),
+    cor: C.green
   }), /*#__PURE__*/React.createElement(Linha, {
     nome: `Horas noturnas (${fmtHoras(resumo.noiteMin)} × ${eur(resumo.valorNoturno)})`,
     valor: eur(resumo.brutoNoite),
