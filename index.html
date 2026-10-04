@@ -332,7 +332,9 @@ const DEFAULTS = {
   // país para feriados automáticos
   acrescimoFeriado: 100,
   // % extra em feriado (100 = horas a dobrar)
-  minHorasVale: 6 // mínimo de horas no dia para contar o vale-refeição
+  minHorasVale: 6,
+  // mínimo de horas no dia para contar o vale-refeição
+  horasContrato: 173.33 // horas mensais do contrato — acima disto conta como hora extra (banco de horas), que demora mais um ciclo a ser paga
 };
 
 /* ---------- feriados nacionais (calculados localmente) ---------- */
@@ -441,6 +443,7 @@ const eur = v => new Intl.NumberFormat("pt-PT", {
   currency: "EUR"
 }).format(v || 0);
 const MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+const MESES_LONGOS = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 const DIAS_SEMANA = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
 function fmtData(iso) {
   const [y, m, d] = iso.split("-").map(Number);
@@ -755,6 +758,74 @@ function calcularPeriodo(offset, cicloInicio, cicloFim) {
   };
 }
 const isoLocal = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+/* calcula o período + resumo (horas, bruto, subsídio, descontos) de QUALQUER
+   ciclo, não só do que está em ecrã — usado pela aba Previsão, que precisa de
+   olhar para ciclos anteriores ao que o offset atual mostra */
+function periodoEResumo(entradas, cfg, feriadosExtra, offset) {
+  const periodo = calcularPeriodo(offset, cfg.cicloInicio, cfg.cicloFim);
+  const a = isoLocal(periodo.inicio);
+  const b = isoLocal(periodo.fim);
+  const doPeriodo = entradas.filter(e => e.data >= a && e.data <= b);
+  const mapaFeriados = new Map();
+  const pais = PAISES_FERIADOS[cfg.pais];
+  const anos = new Set([periodo.inicio.getFullYear(), periodo.fim.getFullYear(), periodo.fim.getFullYear() + 1]);
+  if (pais) {
+    for (const ano of anos) {
+      for (const [dt, nome] of pais.feriados(ano)) mapaFeriados.set(isoLocal(dt), nome);
+    }
+  }
+  for (const iso of feriadosExtra) {
+    if (!mapaFeriados.has(iso)) mapaFeriados.set(iso, "Feriado local");
+  }
+  const isFeriado = iso => mapaFeriados.has(iso);
+  let diaMin = 0,
+    noiteMin = 0,
+    ferMin = 0,
+    brutoNormalDia = 0,
+    brutoNormalNoite = 0,
+    brutoFeriado = 0;
+  const minutosPorDia = new Map();
+  const diasValeAtivo = new Set();
+  const diasTrabalhados = new Set();
+  const vH = cfg.valorHora;
+  const vN = vH * (1 + cfg.majoracaoNoturna / 100);
+  for (const e of doPeriodo) {
+    const t = calcularTurno(e, cfg, isFeriado);
+    diaMin += t.diaMin;
+    noiteMin += t.noiteMin;
+    ferMin += t.ferMin;
+    brutoNormalDia += t.diaMin / 60 * vH;
+    brutoNormalNoite += t.noiteMin / 60 * vN;
+    brutoFeriado += t.valorFeriado;
+    diasTrabalhados.add(e.data);
+    minutosPorDia.set(e.data, (minutosPorDia.get(e.data) || 0) + t.totalMin);
+    if (e.vale !== false) diasValeAtivo.add(e.data);
+  }
+  const limiteVale = (cfg.minHorasVale || 0) * 60;
+  let vales = 0;
+  for (const d of diasValeAtivo) {
+    if ((minutosPorDia.get(d) || 0) >= limiteVale) vales += 1;
+  }
+  const brutoHoras = brutoNormalDia + brutoNormalNoite + brutoFeriado;
+  const subAlim = vales * cfg.valeRefeicao;
+  const totalMin = diaMin + noiteMin + ferMin;
+  return {
+    periodo,
+    diaMin,
+    noiteMin,
+    ferMin,
+    totalMin,
+    horas: totalMin / 60,
+    dias: diasTrabalhados.size,
+    vales,
+    brutoDia: brutoNormalDia,
+    brutoNoite: brutoNormalNoite,
+    brutoFeriado,
+    brutoHoras,
+    subAlim
+  };
+}
 function hojeISO() {
   return isoLocal(new Date());
 }
@@ -1097,6 +1168,11 @@ function PersonTurnos() {
     });
   }
   const tituloPeriodo = `${periodo.inicio.getDate()} ${MESES[periodo.inicio.getMonth()]} — ${periodo.fim.getDate()} ${MESES[periodo.fim.getMonth()]} ${periodo.fim.getFullYear()}`;
+
+  // mês em que o dinheiro deste ciclo realmente cai (um mês depois do fim do ciclo)
+  const pagMes = (periodo.fim.getMonth() + 1) % 12;
+  const pagAno = periodo.fim.getFullYear() + (periodo.fim.getMonth() === 11 ? 1 : 0);
+  const tituloPagamento = `${MESES_LONGOS[pagMes]} ${pagAno}`;
   const num = v => isNaN(parseFloat(v)) ? 0 : parseFloat(v);
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1485,8 +1561,12 @@ function PersonTurnos() {
     cfg: cfg,
     titulo: tituloPeriodo
   }) : aba === "previsao" ? /*#__PURE__*/React.createElement(AbaPrevisao, {
-    resumo: resumo,
-    titulo: tituloPeriodo,
+    entradas: entradas,
+    cfg: cfg,
+    feriadosExtra: feriadosExtra,
+    offset: offset,
+    titulo: tituloPagamento,
+    cicloRef: tituloPeriodo,
     periodoInicio: isoLocal(periodo.inicio),
     recebidos: recebidos,
     onSalvar: salvarRecebido,
@@ -2108,8 +2188,12 @@ const btnTexto = {
   padding: "4px 6px"
 };
 function AbaPrevisao({
-  resumo,
+  entradas,
+  cfg,
+  feriadosExtra,
+  offset,
   titulo,
+  cicloRef,
   periodoInicio,
   recebidos,
   onSalvar,
@@ -2128,8 +2212,25 @@ function AbaPrevisao({
     const n = parseFloat((v || "").toString().replace(",", "."));
     return isNaN(n) ? 0 : n;
   };
-  const estSalario = resumo.brutoHoras - resumo.ss - resumo.irs;
-  const estCartao = resumo.subAlim;
+
+  /* o que cai neste mês vem de 3 ciclos diferentes:
+     - vale-refeição: do ciclo atual (dias trabalhados agora)
+     - horas normais (até ao limiar do contrato): do ciclo anterior
+     - horas extra (acima do limiar, banco de horas): de 2 ciclos atrás
+     porque é assim que esta empresa desfasa o pagamento */
+  const limiar = cfg.horasContrato || 173.33;
+  const rAtual = useMemo(() => periodoEResumo(entradas, cfg, feriadosExtra, offset), [entradas, cfg, feriadosExtra, offset]);
+  const rAnterior = useMemo(() => periodoEResumo(entradas, cfg, feriadosExtra, offset - 1), [entradas, cfg, feriadosExtra, offset]);
+  const rDuasAntes = useMemo(() => periodoEResumo(entradas, cfg, feriadosExtra, offset - 2), [entradas, cfg, feriadosExtra, offset]);
+  const fracaoNormal = rAnterior.horas > 0 ? Math.min(1, limiar / rAnterior.horas) : 0;
+  const brutoNormal = rAnterior.brutoHoras * fracaoNormal;
+  const fracaoExtra = rDuasAntes.horas > limiar && rDuasAntes.horas > 0 ? (rDuasAntes.horas - limiar) / rDuasAntes.horas : 0;
+  const brutoExtra = rDuasAntes.brutoHoras * fracaoExtra;
+  const brutoTotal = brutoNormal + brutoExtra;
+  const ss = brutoTotal * (cfg.taxaSS / 100);
+  const irs = brutoTotal * (cfg.taxaIRS / 100);
+  const estSalario = brutoTotal - ss - irs;
+  const estCartao = rAtual.subAlim;
   function guardar() {
     const s = num(salario),
       c = num(cartao);
@@ -2152,14 +2253,26 @@ function AbaPrevisao({
       display: "grid",
       gap: 16
     }
-  }, /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
+    style: {
+      ...tituloSeccao,
+      margin: "0 0 2px",
+      fontSize: 22
+    }
+  }, titulo), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 12,
+      color: C.muted
+    }
+  }, "ciclo de trabalho: ", cicloRef)), /*#__PURE__*/React.createElement("p", {
     style: {
       margin: 0,
       fontSize: 13,
       color: C.muted,
       lineHeight: 1.5
     }
-  }, "Regista aqui o que realmente caiu na conta e no cartão refeição deste período, para comparares com o que o app estimou a partir das horas. Útil porque o ordenado tem desfasamento em relação às horas feitas — o que trabalhas agora só se reflete no recibo (e é pago) mais tarde."), /*#__PURE__*/React.createElement("section", {
+  }, "Regista aqui o que realmente caiu na conta e no cartão refeição neste mês, para comparares com o que o app estimou a partir das horas. Útil porque o ordenado tem desfasamento em relação às horas feitas — o que trabalhas agora só se reflete no recibo (e é pago) mais tarde."), /*#__PURE__*/React.createElement("section", {
     style: card
   }, /*#__PURE__*/React.createElement("h2", {
     style: {
@@ -2182,10 +2295,17 @@ function AbaPrevisao({
     }
   }), /*#__PURE__*/React.createElement(Linha, {
     nome: "Total estimado",
-    valor: eur(resumo.liquido),
+    valor: eur(estSalario + estCartao),
     cor: C.green,
     forte: true
-  }))), /*#__PURE__*/React.createElement("section", {
+  })), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 11.5,
+      color: C.muted,
+      marginTop: 10,
+      lineHeight: 1.5
+    }
+  }, "Vale-refeição: dias trabalhados neste ciclo (", rAtual.dias, "d). Salário: horas normais do ciclo anterior (até ", limiar, "h, fizeste ", rAnterior.horas.toFixed(0), "h) + hora extra do ciclo de há 2 atrás (acima de ", limiar, "h, fizeste ", rDuasAntes.horas.toFixed(0), "h — ", fracaoExtra > 0 ? `${(rDuasAntes.horas - limiar).toFixed(0)}h extra` : "sem extra", ").")), /*#__PURE__*/React.createElement("section", {
     style: card
   }, existente && !editar ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2484,7 +2604,14 @@ function Definicoes({
       gridTemplateColumns: "1fr 1fr",
       gap: 12
     }
-  }, campo("valorHora", "Valor à hora (€)"), campo("majoracaoNoturna", "Majoração noturna (%)", 1), campo("noiteInicio", "Início da noite (h)", 1), campo("noiteFim", "Fim da noite (h)", 1), campo("valeRefeicao", "Vale-refeição (€)"), campo("minHorasVale", "Mín. horas p/ vale (h)", 0.5), campo("taxaSS", "Segurança Social (%)"), campo("taxaIRS", "Retenção IRS (%)"), campo("cicloInicio", "Ciclo: dia de início", 1), campo("cicloFim", "Ciclo: dia de fim (mês seg.)", 1)), /*#__PURE__*/React.createElement("p", {
+  }, campo("valorHora", "Valor à hora (€)"), campo("majoracaoNoturna", "Majoração noturna (%)", 1), campo("noiteInicio", "Início da noite (h)", 1), campo("noiteFim", "Fim da noite (h)", 1), campo("valeRefeicao", "Vale-refeição (€)"), campo("minHorasVale", "Mín. horas p/ vale (h)", 0.5), campo("taxaSS", "Segurança Social (%)"), campo("taxaIRS", "Retenção IRS (%)"), campo("cicloInicio", "Ciclo: dia de início", 1), campo("cicloFim", "Ciclo: dia de fim (mês seg.)", 1), campo("horasContrato", "Horas do contrato (h/mês)", 0.5)), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 12,
+      color: C.muted,
+      lineHeight: 1.5
+    }
+  }, "\"Horas do contrato\" é o limiar que a aba Previsão usa para separar horas normais de horas extra — acima disto, assume que és pago com mais um ciclo de atraso."), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 12,
       color: C.muted,
