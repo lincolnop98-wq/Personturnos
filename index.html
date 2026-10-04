@@ -1,21 +1,4 @@
-<!DOCTYPE html>
-<html lang="pt-PT">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0E1220">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>PersonTurnos</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
-<style>html,body{margin:0;padding:0;background:#0E1220}</style>
-</head>
-<body>
-<div id="root"></div>
-<script>/**
+<!DOCTYPE html><html lang="pt-PT"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#0E1220"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><title>PersonTurnos</title><link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><style>html,body{margin:0;padding:0;background:#0E1220}</style></head><body><div id="root"></div><script>/**
  * @license React
  * react.production.min.js
  *
@@ -46,8 +29,7 @@ render:a}};c.isValidElement=M;c.lazy=function(a){return{$$typeof:Aa,_payload:{_s
 c.useEffect=function(a,b){return g.current.useEffect(a,b)};c.useId=function(){return g.current.useId()};c.useImperativeHandle=function(a,b,c){return g.current.useImperativeHandle(a,b,c)};c.useInsertionEffect=function(a,b){return g.current.useInsertionEffect(a,b)};c.useLayoutEffect=function(a,b){return g.current.useLayoutEffect(a,b)};c.useMemo=function(a,b){return g.current.useMemo(a,b)};c.useReducer=function(a,b,c){return g.current.useReducer(a,b,c)};c.useRef=function(a){return g.current.useRef(a)};
 c.useState=function(a){return g.current.useState(a)};c.useSyncExternalStore=function(a,b,c){return g.current.useSyncExternalStore(a,b,c)};c.useTransition=function(){return g.current.useTransition()};c.version="18.3.1"});
 })();
-</script>
-<script>/**
+</script><script>/**
  * @license React
  * react-dom.production.min.js
  *
@@ -314,19 +296,8 @@ c,!1,d,e);a[Ja]=b.current;sc(8===a.nodeType?a.parentNode:a);return new Xf(b)};Q.
 var d=null!=c&&c.hydratedSources||null,e=!1,f="",g=aj;null!==c&&void 0!==c&&(!0===c.unstable_strictMode&&(e=!0),void 0!==c.identifierPrefix&&(f=c.identifierPrefix),void 0!==c.onRecoverableError&&(g=c.onRecoverableError));b=Wi(b,null,a,1,null!=c?c:null,e,!1,f,g);a[Ja]=b.current;sc(a);if(d)for(a=0;a<d.length;a++)c=d[a],e=c._getVersion,e=e(c._source),null==b.mutableSourceEagerHydrationData?b.mutableSourceEagerHydrationData=[c,e]:b.mutableSourceEagerHydrationData.push(c,e);return new Ud(b)};Q.render=
 function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmountComponentAtNode=function(a){if(!Vd(a))throw Error(m(40));return a._reactRootContainer?(yb(function(){Wd(null,null,a,!1,function(){a._reactRootContainer=null;a[Ja]=null})}),!0):!1};Q.unstable_batchedUpdates=Tf;Q.unstable_renderSubtreeIntoContainer=function(a,b,c,d){if(!Vd(c))throw Error(m(200));if(null==a||void 0===a._reactInternals)throw Error(m(38));return Wd(a,b,c,!1,d)};Q.version="18.3.1-next-f1338f8080-20240426"});
 })();
-</script>
-<script>
-window.storage = {
-  async get(k){ const v = localStorage.getItem('pt_'+k); if(v===null) throw new Error('não existe'); return {key:k, value:v}; },
-  async set(k,v){ localStorage.setItem('pt_'+k, v); return {key:k, value:v}; },
-  async delete(k){ localStorage.removeItem('pt_'+k); return {key:k, deleted:true}; },
-  async list(){ return {keys: Object.keys(localStorage).filter(x=>x.startsWith('pt_')).map(x=>x.slice(3))}; }
-};
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-}
-</script>
-<script>const {
+</script><script>window.storage={async get(k){const v=localStorage.getItem('pt_'+k);if(v===null)throw new Error('n');return{key:k,value:v}},async set(k,v){localStorage.setItem('pt_'+k,v);return{key:k,value:v}},async delete(k){localStorage.removeItem('pt_'+k);return{key:k,deleted:true}},async list(){return{keys:Object.keys(localStorage).filter(x=>x.startsWith('pt_')).map(x=>x.slice(3))}}};
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){})})}</script><script>const {
   useState,
   useEffect,
   useMemo
@@ -1010,7 +981,8 @@ function PersonTurnos() {
     return [...s].sort();
   }, [entradas]);
 
-  /* cor associada a cada local (a última usada) — para a legenda e memória */
+  /* cor associada a cada local (a última usada, em todo o histórico) — só para
+     recuperar a cor habitual quando escreves um nome de local já conhecido */
   const coresPorLocal = useMemo(() => {
     const m = {};
     for (const e of entradas) {
@@ -1024,6 +996,27 @@ function PersonTurnos() {
     const nome = fLocal.trim();
     if (nome && coresPorLocal[nome]) setFCor(coresPorLocal[nome]);
   }, [fLocal, coresPorLocal]);
+
+  /* legenda do período em vista: só locais realmente trabalhados neste ciclo,
+     com a cor usada e o total de horas feitas em cada um */
+  const resumoLocaisPeriodo = useMemo(() => {
+    const m = {}; // local -> { cor, min }
+    for (const e of doPeriodo) {
+      if (!e.local) continue;
+      if (!m[e.local]) m[e.local] = {
+        cor: e.cor || COR_PADRAO,
+        min: 0
+      };
+      const t = calcularTurno(e, cfg, isFeriado);
+      m[e.local].min += t.totalMin;
+      if (e.cor) m[e.local].cor = e.cor;
+    }
+    return Object.entries(m).map(([local, v]) => ({
+      local,
+      cor: v.cor,
+      min: v.min
+    })).sort((a, b) => b.min - a.min);
+  }, [doPeriodo, cfg, mapaFeriados]);
   const [flash, setFlash] = useState("");
 
   /* Cria o mesmo turno (hora + local) em todos os dias selecionados */
@@ -1304,7 +1297,7 @@ function PersonTurnos() {
     selecionados: fDatas,
     porData: porData,
     mapaFeriados: mapaFeriados,
-    coresPorLocal: coresPorLocal,
+    resumoLocaisPeriodo: resumoLocaisPeriodo,
     onToggle: d => setFDatas(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d])
   }), fDatas.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1657,7 +1650,7 @@ function SeletorDias({
   selecionados,
   porData,
   mapaFeriados,
-  coresPorLocal,
+  resumoLocaisPeriodo,
   onToggle
 }) {
   // cabeçalho: semana começa à segunda (estilo PT)
@@ -1693,8 +1686,8 @@ function SeletorDias({
     return vistas.slice(0, 3);
   };
 
-  // legenda cor → local (a partir dos turnos já registados)
-  const legenda = Object.entries(coresPorLocal);
+  // legenda cor → local, só dos locais trabalhados neste período, com total de horas
+  const legenda = resumoLocaisPeriodo;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       background: C.card2,
@@ -1799,7 +1792,11 @@ function SeletorDias({
       paddingTop: 10,
       borderTop: `1px solid ${C.border}`
     }
-  }, legenda.map(([local, cor]) => /*#__PURE__*/React.createElement("span", {
+  }, legenda.map(({
+    local,
+    cor,
+    min
+  }) => /*#__PURE__*/React.createElement("span", {
     key: local,
     style: {
       display: "inline-flex",
@@ -1813,9 +1810,14 @@ function SeletorDias({
       width: 9,
       height: 9,
       borderRadius: 5,
-      background: cor
+      background: cor,
+      flexShrink: 0
     }
-  }), local))), /*#__PURE__*/React.createElement("div", {
+  }), local, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.muted
+    }
+  }, "· ", fmtHoras(min))))), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: C.muted,
@@ -2564,6 +2566,4 @@ function DiaLinha({
     }
   }, "+ bloco neste dia"));
 }
-ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(PersonTurnos));</script>
-</body>
-</html>
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(PersonTurnos));</script></body></html>
