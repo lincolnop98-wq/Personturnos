@@ -334,7 +334,7 @@ const DEFAULTS = {
   // % extra em feriado (100 = horas a dobrar)
   minHorasVale: 6,
   // mínimo de horas no dia para contar o vale-refeição
-  horasContrato: 173.33 // horas mensais do contrato — acima disto conta como hora extra (banco de horas), que demora mais um ciclo a ser paga
+  horasContrato: 173.33 // horas mensais do contrato — acima disto conta como hora extra (banco de horas), que demora mais um ciclo a ser paga do que as horas normais do mesmo ciclo
 };
 
 /* ---------- feriados nacionais (calculados localmente) ---------- */
@@ -2344,20 +2344,24 @@ function AbaPrevisao({
     return isNaN(n) ? 0 : n;
   };
 
-  /* o que cai neste mês vem de 3 ciclos diferentes:
-     - vale-refeição: do ciclo atual (dias trabalhados agora)
-     - horas normais (até ao limiar do contrato): do ciclo anterior
-     - horas extra (acima do limiar, banco de horas): de 2 ciclos atrás
-     porque é assim que esta empresa desfasa o pagamento */
+  /* o que cai neste mês vem de 2 ciclos diferentes:
+     - vale-refeição + horas normais (até ao limiar do contrato): do próprio
+       ciclo deste título (sem atraso extra — é o desfasamento "normal" de um
+       mês entre trabalhar e receber, já embutido no próprio título)
+     - horas extra (acima do limiar, banco de horas): do ciclo ANTERIOR — a
+       parte que passou do limiar nesse ciclo só é paga um título mais tarde
+       do que a parte normal desse mesmo ciclo */
   const limiar = cfg.horasContrato || 173.33;
   const rAtual = useMemo(() => periodoEResumo(entradas, cfg, feriadosExtra, offset, ferias), [entradas, cfg, feriadosExtra, offset, ferias]);
   const rAnterior = useMemo(() => periodoEResumo(entradas, cfg, feriadosExtra, offset - 1, ferias), [entradas, cfg, feriadosExtra, offset, ferias]);
-  const rDuasAntes = useMemo(() => periodoEResumo(entradas, cfg, feriadosExtra, offset - 2, ferias), [entradas, cfg, feriadosExtra, offset, ferias]);
-  const fracaoNormal = rAnterior.horas > 0 ? Math.min(1, limiar / rAnterior.horas) : 0;
-  const brutoNormal = rAnterior.brutoHoras * fracaoNormal;
-  const fracaoExtra = rDuasAntes.horas > limiar && rDuasAntes.horas > 0 ? (rDuasAntes.horas - limiar) / rDuasAntes.horas : 0;
-  const brutoExtra = rDuasAntes.brutoHoras * fracaoExtra;
-  const brutoTotal = brutoNormal + brutoExtra;
+  const fracaoNormalAtual = rAtual.horas > 0 ? Math.min(1, limiar / rAtual.horas) : 0;
+  const brutoNormalAtual = rAtual.brutoHoras * fracaoNormalAtual;
+  const horasNormalAtual = Math.min(limiar, rAtual.horas);
+  const horasExtraAnterior = Math.max(0, rAnterior.horas - limiar);
+  const fracaoExtraAnterior = rAnterior.horas > limiar ? horasExtraAnterior / rAnterior.horas : 0;
+  const brutoExtraAnterior = rAnterior.brutoHoras * fracaoExtraAnterior;
+  const cicloAnteriorRef = `${rAnterior.periodo.inicio.getDate()} ${MESES[rAnterior.periodo.inicio.getMonth()]} — ${rAnterior.periodo.fim.getDate()} ${MESES[rAnterior.periodo.fim.getMonth()]}`;
+  const brutoTotal = brutoNormalAtual + brutoExtraAnterior;
   const ss = brutoTotal * (cfg.taxaSS / 100);
   const irs = brutoTotal * (cfg.taxaIRS / 100);
   const estSalario = brutoTotal - ss - irs;
@@ -2436,7 +2440,7 @@ function AbaPrevisao({
       marginTop: 10,
       lineHeight: 1.5
     }
-  }, "Vale-refeição: dias trabalhados neste ciclo (", rAtual.dias, "d). Salário: horas normais do ciclo anterior (até ", limiar, "h, fizeste ", rAnterior.horas.toFixed(0), "h) + hora extra do ciclo de há 2 atrás (acima de ", limiar, "h, fizeste ", rDuasAntes.horas.toFixed(0), "h — ", fracaoExtra > 0 ? `${(rDuasAntes.horas - limiar).toFixed(0)}h extra` : "sem extra", ").")), /*#__PURE__*/React.createElement("section", {
+  }, "Vale-refeição: dias trabalhados neste ciclo (", cicloRef, ") — ", rAtual.dias, "d.", " ", "Horas normais: até ", limiar, "h deste mesmo ciclo — fizeste ", horasNormalAtual.toFixed(0), "h", rAtual.diasFerias > 0 ? ` (inclui ${rAtual.diasFerias} ${rAtual.diasFerias === 1 ? "dia" : "dias"} de férias)` : "", ".", " ", "Horas extra: acima de ", limiar, "h no ciclo anterior (", cicloAnteriorRef, ") — fizeste ", rAnterior.horas.toFixed(0), "h,", " ", horasExtraAnterior > 0 ? `${horasExtraAnterior.toFixed(0)}h extra` : "sem extra", ".")), /*#__PURE__*/React.createElement("section", {
     style: card
   }, existente && !editar ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2746,7 +2750,7 @@ function Definicoes({
       color: C.muted,
       lineHeight: 1.5
     }
-  }, "\"Horas do contrato\" é o limiar que a aba Previsão usa para separar horas normais de horas extra — acima disto, assume que és pago com mais um ciclo de atraso."), /*#__PURE__*/React.createElement("p", {
+  }, "\"Horas do contrato\" é o limiar que a aba Previsão usa para separar horas normais de horas extra — as normais (e o vale-refeição) são do próprio ciclo em vista; as extra (banco de horas) vêm do ciclo anterior, porque demoram mais um ciclo a ser pagas."), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 12,
       color: C.muted,
